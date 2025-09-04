@@ -13,10 +13,10 @@ function MetricCard({ title, value, percentage, showProgressBar = false }: Metri
 
   return (
     <div className="mb-12">
-      <h2 className="text-lg font-normal text-black mb-3 tracking-wide">
+      <h2 className="text-base font-medium mb-3">
         {title}
       </h2>
-      <div className="text-3xl font-normal text-black mb-4 tracking-wide">
+      <div className="text-xl font-normal mb-4">
         {value}
       </div>
       {showProgressBar && (
@@ -28,7 +28,7 @@ function MetricCard({ title, value, percentage, showProgressBar = false }: Metri
             />
           </div>
           {percentage && (
-            <span className="text-base min-w-[3rem] text-right font-normal" style={{ color: '#757575' }}>
+            <span className="text-sm min-w-[3rem] text-right font-normal text-gray-500">
               {percentage}
             </span>
           )}
@@ -57,7 +57,7 @@ export default function Home() {
           <h1 className="text-sm font-semibold">
             BioTissue Colombia
           </h1>
-          <span className="text-xs">
+          <span className="text-xs font-normal">
             {currentDate}
           </span>
         </div>
