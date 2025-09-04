@@ -50,14 +50,14 @@ export default function Home() {
       {/* Header */}
       <div className="mb-16">
         <div className="mb-6">
-          <p className="font-bold tracking-[-0.5em] text-black">|   |  || ||| |||||</p> 
+          <p className="text-lg font-bold tracking-[-0.5em]">|   |  || ||| |||||</p> 
         </div>
         
         <div className="flex justify-between items-start">
-          <h1 className="text-xl font-normal text-black tracking-wide leading-tight">
+          <h1 className="text-sm font-semibold">
             BioTissue Colombia
           </h1>
-          <span className="text-base text-black tracking-wide">
+          <span className="text-xs">
             {currentDate}
           </span>
         </div>
@@ -96,7 +96,8 @@ export default function Home() {
         <MetricCard
           title="Caja"
           value="$78.000.000"
-          showProgressBar={false}
+          percentage="100%"
+          showProgressBar={true}
         />
       </div>
     </main>
