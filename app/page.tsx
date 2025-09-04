@@ -16,22 +16,22 @@ function MetricCard({ title, value, percentage, showProgressBar = false }: Metri
       <h2 className="text-base font-medium mb-3">
         {title}
       </h2>
-      <div className="text-xl font-normal mb-4">
-        {value}
+      <div className="flex justify-between items-baseline mb-4">
+        <div className="text-xl font-normal">
+          {value}
+        </div>
+        {percentage && (
+          <span className="text-sm font-normal text-gray-500">
+            {percentage}
+          </span>
+        )}
       </div>
       {showProgressBar && (
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-3" style={{ backgroundColor: '#e5e5e5' }}>
-            <div 
-              className="bg-black h-3 transition-all duration-300" 
-              style={{ width: getProgressWidth() }}
-            />
-          </div>
-          {percentage && (
-            <span className="text-sm min-w-[3rem] text-right font-normal text-gray-500">
-              {percentage}
-            </span>
-          )}
+        <div className="w-full h-[10px]">
+          <div 
+            className="bg-linear-to-r from-background to-foreground h-full" 
+            style={{ width: getProgressWidth() }}
+          />
         </div>
       )}
     </div>
