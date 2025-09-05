@@ -12,11 +12,11 @@ function MetricCard({ title, value, percentage, showProgressBar = false }: Metri
   };
 
   return (
-    <div className="mb-12">
-      <h2 className="text-base font-medium mb-3">
+    <div className="mb-11">
+      <h2 className="text-base font-medium">
         {title}
       </h2>
-      <div className="flex justify-between items-baseline mb-4">
+      <div className="flex justify-between items-baseline mb-1">
         <div className="text-xl font-normal">
           {value}
         </div>
@@ -48,8 +48,8 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white px-8 py-12 max-w-md mx-auto font-mono">
       {/* Header */}
-      <div className="mb-16">
-        <div className="mb-6">
+      <div className="mb-13">
+        <div>
           <p className="text-lg font-bold tracking-[-0.5em]">|   |  || ||| |||||</p> 
         </div>
         
