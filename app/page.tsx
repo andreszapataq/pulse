@@ -12,7 +12,7 @@ function MetricCard({ title, value, percentage, showProgressBar = false }: Metri
   };
 
   return (
-    <div className="mb-11">
+    <div className="mb-10">
       <h2 className="text-base font-medium">
         {title}
       </h2>
