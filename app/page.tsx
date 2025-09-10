@@ -1,3 +1,5 @@
+import { getMetricsData, type MetricsData } from '@/lib/metrics';
+
 interface MetricCardProps {
   title: string;
   value: string;
@@ -38,14 +40,18 @@ function MetricCard({ title, value, percentage, showProgressBar = false }: Metri
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  // Cargar datos desde el JSON
+  const metricsData = await getMetricsData();
+  
   const currentDate = new Date().toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
   });
 
-  const lastUpdateTime = new Date().toLocaleTimeString('es-ES', {
+  // Formatear la fecha de última actualización
+  const lastUpdateTime = new Date(metricsData.lastUpdated).toLocaleTimeString('es-ES', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true
@@ -61,7 +67,7 @@ export default function Home() {
         
         <div className="flex justify-between items-start">
           <h1 className="text-sm font-semibold">
-            BioTissue Colombia
+            {metricsData.companyName}
           </h1>
           <span className="text-xs font-normal">
             {currentDate}
@@ -72,38 +78,38 @@ export default function Home() {
       {/* Metrics */}
       <div>
         <MetricCard
-          title="Ventas"
-          value="$120.000.000"
-          percentage="85%"
-          showProgressBar={true}
+          title={metricsData.metrics.ventas.title}
+          value={metricsData.metrics.ventas.formattedValue}
+          percentage={`${metricsData.metrics.ventas.percentage}%`}
+          showProgressBar={metricsData.metrics.ventas.showProgressBar}
         />
         
         <MetricCard
-          title="Recaudo"
-          value="$135.000.000"
-          percentage="92%"
-          showProgressBar={true}
+          title={metricsData.metrics.recaudo.title}
+          value={metricsData.metrics.recaudo.formattedValue}
+          percentage={`${metricsData.metrics.recaudo.percentage}%`}
+          showProgressBar={metricsData.metrics.recaudo.showProgressBar}
         />
         
         <MetricCard
-          title="Inventario"
-          value="$300.000.000"
-          percentage="100%"
-          showProgressBar={true}
+          title={metricsData.metrics.inventario.title}
+          value={metricsData.metrics.inventario.formattedValue}
+          percentage={`${metricsData.metrics.inventario.percentage}%`}
+          showProgressBar={metricsData.metrics.inventario.showProgressBar}
         />
         
         <MetricCard
-          title="Margen"
-          value="30%"
-          percentage="33%"
-          showProgressBar={true}
+          title={metricsData.metrics.margen.title}
+          value={metricsData.metrics.margen.formattedValue}
+          percentage={`${metricsData.metrics.margen.percentage}%`}
+          showProgressBar={metricsData.metrics.margen.showProgressBar}
         />
         
         <MetricCard
-          title="Caja"
-          value="$78.000.000"
-          percentage="100%"
-          showProgressBar={true}
+          title={metricsData.metrics.caja.title}
+          value={metricsData.metrics.caja.formattedValue}
+          percentage={`${metricsData.metrics.caja.percentage}%`}
+          showProgressBar={metricsData.metrics.caja.showProgressBar}
         />
       </div>
 
