@@ -45,6 +45,12 @@ export default function Home() {
     year: 'numeric'
   });
 
+  const lastUpdateTime = new Date().toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+
   return (
     <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
       {/* Header */}
@@ -99,6 +105,13 @@ export default function Home() {
           percentage="100%"
           showProgressBar={true}
         />
+      </div>
+
+      {/* Footer with last update time */}
+      <div className="mt-24 text-center">
+        <span className="text-xs font-normal text-gray-500">
+          Última actualización: {lastUpdateTime}
+        </span>
       </div>
     </main>
   );
