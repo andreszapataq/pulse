@@ -1,4 +1,8 @@
 import { getMetricsData, formatFileDate, formatValue, calculatePercentage, type MetricsData } from '@/lib/metrics';
+import AutoRefresh from './components/AutoRefresh';
+
+// Configurar revalidación cada 2 minutos (más frecuente para mejor UX)
+export const revalidate = 120;
 
 interface MetricCardProps {
   title: string;
@@ -57,6 +61,9 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
+      {/* Auto-refresh component - cada 2 minutos para mejor UX */}
+      <AutoRefresh intervalMinutes={2} />
+      
       {/* Header */}
       <div className="mb-[50px]">
         <div>
