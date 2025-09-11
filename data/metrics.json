@@ -15,7 +15,7 @@
     },
     "inventario": {
       "title": "Inventario",
-      "value": 300000000,
+      "value": 122992365,
       "target": 300000000,
       "showProgressBar": true
     },
@@ -28,7 +28,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value": 78000000,
+      "value": 71566484,
       "target": 78000000,
       "showProgressBar": true
     }
