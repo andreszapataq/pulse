@@ -15,13 +15,7 @@ export interface Metric {
 }
 
 export interface MetricsData {
-  lastUpdated: string;
   companyName: string;
-  period: {
-    start: string;
-    end: string;
-    description: string;
-  };
   metrics: {
     ventas: Metric;
     recaudo: Metric;
@@ -29,32 +23,35 @@ export interface MetricsData {
     margen: Metric;
     caja: Metric;
   };
-  notes: string;
+  // Campo automático agregado dinámicamente
+  fileLastModified?: string;
 }
 
 /**
  * Lee los datos de métricas desde el archivo JSON
+ * Incluye automáticamente la fecha de modificación del archivo
  */
 export async function getMetricsData(): Promise<MetricsData> {
   try {
     const filePath = path.join(process.cwd(), 'data', 'metrics.json');
+    
+    // Obtener información del archivo (incluyendo fecha de modificación)
+    const fileStats = await fs.stat(filePath);
     const fileContents = await fs.readFile(filePath, 'utf8');
     const data: MetricsData = JSON.parse(fileContents);
     
+    // Agregar la fecha de modificación del archivo automáticamente
+    data.fileLastModified = fileStats.mtime.toISOString();
+    
     console.log('✅ Datos de métricas cargados exitosamente');
+    console.log(`📅 Archivo modificado: ${formatFileDate(data.fileLastModified)}`);
     return data;
   } catch (error) {
     console.error('❌ Error al cargar datos de métricas:', error);
     
     // Datos por defecto en caso de error
     const defaultData: MetricsData = {
-      lastUpdated: new Date().toISOString(),
       companyName: "BioTissue Colombia",
-      period: {
-        start: new Date().toISOString().split('T')[0],
-        end: new Date().toISOString().split('T')[0],
-        description: "Datos por defecto"
-      },
       metrics: {
         ventas: {
           title: "Ventas",
@@ -97,8 +94,7 @@ export async function getMetricsData(): Promise<MetricsData> {
           percentage: 0,
           showProgressBar: true
         }
-      },
-      notes: "Error al cargar datos - usando valores por defecto"
+      }
     };
     
     return defaultData;
@@ -122,4 +118,23 @@ export function formatCurrency(value: number): string {
  */
 export function formatPercentage(value: number): string {
   return `${value}%`;
+}
+
+/**
+ * Formatea la fecha de modificación del archivo para mostrar en la interfaz
+ */
+export function formatFileDate(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (error) {
+    return 'Fecha no disponible';
+  }
 }

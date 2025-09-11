@@ -1,4 +1,4 @@
-import { getMetricsData, type MetricsData } from '@/lib/metrics';
+import { getMetricsData, formatFileDate, type MetricsData } from '@/lib/metrics';
 
 interface MetricCardProps {
   title: string;
@@ -50,12 +50,10 @@ export default async function Home() {
     year: 'numeric'
   });
 
-  // Formatear la fecha de última actualización
-  const lastUpdateTime = new Date(metricsData.lastUpdated).toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  });
+  // Usar la fecha de modificación del archivo (automática)
+  const fileModifiedTime = metricsData.fileLastModified 
+    ? formatFileDate(metricsData.fileLastModified)
+    : 'Fecha no disponible';
 
   return (
     <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
@@ -113,10 +111,10 @@ export default async function Home() {
         />
       </div>
 
-      {/* Footer with last update time */}
+      {/* Footer with automatic file modification time */}
       <div className="mt-24 text-center">
         <span className="text-xs font-normal text-gray-500">
-          Última actualización: {lastUpdateTime}
+          Última actualización: {fileModifiedTime}
         </span>
       </div>
     </main>
