@@ -110,17 +110,19 @@ export function formatPercentage(value: number): string {
 
 /**
  * Formatea la fecha de modificación del archivo para mostrar en la interfaz
+ * Usa la zona horaria de Colombia (America/Bogota)
  */
 export function formatFileDate(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
+    return date.toLocaleString('es-CO', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: 'America/Bogota'
     });
   } catch (error) {
     return 'Fecha no disponible';

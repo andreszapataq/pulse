@@ -3,8 +3,8 @@
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 150000000,
-      "target": 160000000,
+      "value": 22437396,
+      "target": 150000000,
       "showProgressBar": true
     },
     "recaudo": {

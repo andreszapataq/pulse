@@ -1,0 +1,10 @@
+{
+  "env": {
+    "TZ": "America/Bogota"
+  },
+  "functions": {
+    "app/**/*.js": {
+      "includeFiles": "data/**"
+    }
+  }
+}
