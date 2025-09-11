@@ -7,9 +7,7 @@ import path from 'path';
 export interface Metric {
   title: string;
   value: number;
-  formattedValue: string;
   target: number;
-  percentage: number;
   showProgressBar: boolean;
   unit?: string;
 }
@@ -56,42 +54,32 @@ export async function getMetricsData(): Promise<MetricsData> {
         ventas: {
           title: "Ventas",
           value: 0,
-          formattedValue: "$0",
           target: 0,
-          percentage: 0,
           showProgressBar: true
         },
         recaudo: {
           title: "Recaudo",
           value: 0,
-          formattedValue: "$0",
           target: 0,
-          percentage: 0,
           showProgressBar: true
         },
         inventario: {
           title: "Inventario",
           value: 0,
-          formattedValue: "$0",
           target: 0,
-          percentage: 0,
           showProgressBar: true
         },
         margen: {
           title: "Margen",
           value: 0,
-          formattedValue: "0%",
           target: 0,
-          percentage: 0,
           showProgressBar: true,
           unit: "%"
         },
         caja: {
           title: "Caja",
           value: 0,
-          formattedValue: "$0",
           target: 0,
-          percentage: 0,
           showProgressBar: true
         }
       }
@@ -137,4 +125,22 @@ export function formatFileDate(dateString: string): string {
   } catch (error) {
     return 'Fecha no disponible';
   }
+}
+
+/**
+ * Formatea un valor según su unidad (moneda o porcentaje)
+ */
+export function formatValue(value: number, unit?: string): string {
+  if (unit === '%') {
+    return `${value}%`;
+  }
+  return formatCurrency(value);
+}
+
+/**
+ * Calcula el porcentaje de progreso basado en value/target
+ */
+export function calculatePercentage(value: number, target: number): number {
+  if (target === 0) return 0;
+  return Math.round((value / target) * 100);
 }

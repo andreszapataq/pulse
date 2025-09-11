@@ -4,42 +4,32 @@
     "ventas": {
       "title": "Ventas",
       "value": 150000000,
-      "formattedValue": "$150.000.000",
       "target": 160000000,
-      "percentage": 88,
       "showProgressBar": true
     },
     "recaudo": {
-      "title": "Recaudo", 
+      "title": "Recaudo",
       "value": 135000000,
-      "formattedValue": "$135.000.000",
       "target": 147000000,
-      "percentage": 92,
       "showProgressBar": true
     },
     "inventario": {
       "title": "Inventario",
       "value": 300000000,
-      "formattedValue": "$300.000.000",
       "target": 300000000,
-      "percentage": 100,
       "showProgressBar": true
     },
     "margen": {
       "title": "Margen",
       "value": 30,
-      "formattedValue": "30%",
       "target": 33,
-      "percentage": 33,
       "showProgressBar": true,
       "unit": "%"
     },
     "caja": {
       "title": "Caja",
       "value": 78000000,
-      "formattedValue": "$78.000.000",
       "target": 78000000,
-      "percentage": 100,
       "showProgressBar": true
     }
   }

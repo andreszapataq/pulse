@@ -1,4 +1,4 @@
-import { getMetricsData, formatFileDate, type MetricsData } from '@/lib/metrics';
+import { getMetricsData, formatFileDate, formatValue, calculatePercentage, type MetricsData } from '@/lib/metrics';
 
 interface MetricCardProps {
   title: string;
@@ -77,43 +77,43 @@ export default async function Home() {
       <div>
         <MetricCard
           title={metricsData.metrics.ventas.title}
-          value={metricsData.metrics.ventas.formattedValue}
-          percentage={`${metricsData.metrics.ventas.percentage}%`}
+          value={formatValue(metricsData.metrics.ventas.value, metricsData.metrics.ventas.unit)}
+          percentage={`${calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target)}%`}
           showProgressBar={metricsData.metrics.ventas.showProgressBar}
         />
         
         <MetricCard
           title={metricsData.metrics.recaudo.title}
-          value={metricsData.metrics.recaudo.formattedValue}
-          percentage={`${metricsData.metrics.recaudo.percentage}%`}
+          value={formatValue(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.unit)}
+          percentage={`${calculatePercentage(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.target)}%`}
           showProgressBar={metricsData.metrics.recaudo.showProgressBar}
         />
         
         <MetricCard
           title={metricsData.metrics.inventario.title}
-          value={metricsData.metrics.inventario.formattedValue}
-          percentage={`${metricsData.metrics.inventario.percentage}%`}
+          value={formatValue(metricsData.metrics.inventario.value, metricsData.metrics.inventario.unit)}
+          percentage={`${calculatePercentage(metricsData.metrics.inventario.value, metricsData.metrics.inventario.target)}%`}
           showProgressBar={metricsData.metrics.inventario.showProgressBar}
         />
         
         <MetricCard
           title={metricsData.metrics.margen.title}
-          value={metricsData.metrics.margen.formattedValue}
-          percentage={`${metricsData.metrics.margen.percentage}%`}
+          value={formatValue(metricsData.metrics.margen.value, metricsData.metrics.margen.unit)}
+          percentage={`${calculatePercentage(metricsData.metrics.margen.value, metricsData.metrics.margen.target)}%`}
           showProgressBar={metricsData.metrics.margen.showProgressBar}
         />
         
         <MetricCard
           title={metricsData.metrics.caja.title}
-          value={metricsData.metrics.caja.formattedValue}
-          percentage={`${metricsData.metrics.caja.percentage}%`}
+          value={formatValue(metricsData.metrics.caja.value, metricsData.metrics.caja.unit)}
+          percentage={`${calculatePercentage(metricsData.metrics.caja.value, metricsData.metrics.caja.target)}%`}
           showProgressBar={metricsData.metrics.caja.showProgressBar}
         />
       </div>
 
       {/* Footer with automatic file modification time */}
-      <div className="mt-24 text-center">
-        <span className="text-xs font-normal text-gray-500">
+      <div className="mt-22 text-center">
+        <span className="text-[11px] font-normal text-gray-500">
           Última actualización: {fileModifiedTime}
         </span>
       </div>
