@@ -10,7 +10,7 @@
     "recaudo": {
       "title": "Recaudo",
       "value": 135000000,
-      "target": 147000000,
+      "target": 150000000,
       "showProgressBar": true
     },
     "inventario": {
