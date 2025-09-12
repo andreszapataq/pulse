@@ -48,7 +48,7 @@ export default async function Home() {
   // Cargar datos desde el JSON
   const metricsData = await getMetricsData();
   
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  const currentDate = new Date().toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
