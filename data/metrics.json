@@ -21,8 +21,8 @@
     },
     "margen": {
       "title": "Margen",
-      "value": 30,
-      "target": 33,
+      "value": 28,
+      "target": 30,
       "showProgressBar": true,
       "unit": "%"
     },
