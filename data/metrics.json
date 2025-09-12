@@ -16,7 +16,7 @@
     "inventario": {
       "title": "Inventario",
       "value": 122992365,
-      "target": 300000000,
+      "target": 150000000,
       "showProgressBar": true
     },
     "margen": {
@@ -29,7 +29,7 @@
     "caja": {
       "title": "Caja",
       "value": 71566484,
-      "target": 78000000,
+      "target": 100000000,
       "showProgressBar": true
     }
   }
