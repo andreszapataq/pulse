@@ -48,10 +48,11 @@ export default async function Home() {
   // Cargar datos desde el JSON
   const metricsData = await getMetricsData();
   
-  const currentDate = new Date().toLocaleDateString('es-ES', {
+  const currentDate = new Date().toLocaleDateString('es-CO', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'America/Bogota'
   });
 
   // Usar la fecha de modificación del archivo (automática)
