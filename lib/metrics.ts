@@ -14,6 +14,7 @@ export interface Metric {
 
 export interface MetricsData {
   companyName: string;
+  lastUpdated?: string; // Fecha manual en el JSON
   metrics: {
     ventas: Metric;
     recaudo: Metric;
@@ -38,19 +39,19 @@ export async function getMetricsData(): Promise<MetricsData> {
     const fileContents = await fs.readFile(filePath, 'utf8');
     const data: MetricsData = JSON.parse(fileContents);
     
-    // Verificar si la fecha del archivo es sospechosa (anterior a 2020)
-    const fileDate = new Date(fileStats.mtime);
-    const suspiciousDate = new Date('2020-01-01');
+    // Estrategia de fechas simplificada:
+    // 1. Si existe lastUpdated en el JSON, usarla (recomendado)
+    // 2. Como respaldo, usar fecha del archivo
     
-    if (fileDate < suspiciousDate) {
-      // Usar fecha actual si la fecha del archivo es sospechosa
-      data.fileLastModified = new Date().toISOString();
-      console.log('⚠️ Fecha de archivo sospechosa detectada, usando fecha actual');
-      console.log(`📅 Fecha del archivo: ${formatFileDate(fileStats.mtime.toISOString())}`);
-      console.log(`📅 Usando fecha actual: ${formatFileDate(data.fileLastModified)}`);
+    if (data.lastUpdated) {
+      // Prioridad 1: Usar fecha manual del JSON (recomendado)
+      data.fileLastModified = data.lastUpdated;
+      console.log('✅ Usando fecha manual del JSON');
+      console.log(`📅 Fecha de actualización: ${formatFileDate(data.fileLastModified)}`);
     } else {
+      // Prioridad 2: Usar fecha del archivo como respaldo
       data.fileLastModified = fileStats.mtime.toISOString();
-      console.log('✅ Fecha de archivo válida');
+      console.log('✅ Usando fecha del archivo');
       console.log(`📅 Archivo modificado: ${formatFileDate(data.fileLastModified)}`);
     }
     
