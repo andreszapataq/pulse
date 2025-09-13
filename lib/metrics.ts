@@ -93,12 +93,15 @@ export async function getMetricsData(): Promise<MetricsData> {
  * Formatea un número como moneda colombiana
  */
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('es-CO', {
+  const formatted = new Intl.NumberFormat('es-CO', {
     style: 'currency',
     currency: 'COP',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
+  
+  // Eliminar el espacio entre el símbolo de pesos y el número
+  return formatted.replace('$ ', '$');
 }
 
 /**
