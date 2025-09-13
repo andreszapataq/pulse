@@ -38,11 +38,23 @@ export async function getMetricsData(): Promise<MetricsData> {
     const fileContents = await fs.readFile(filePath, 'utf8');
     const data: MetricsData = JSON.parse(fileContents);
     
-    // Agregar la fecha de modificación del archivo automáticamente
-    data.fileLastModified = fileStats.mtime.toISOString();
+    // Verificar si la fecha del archivo es sospechosa (anterior a 2020)
+    const fileDate = new Date(fileStats.mtime);
+    const suspiciousDate = new Date('2020-01-01');
+    
+    if (fileDate < suspiciousDate) {
+      // Usar fecha actual si la fecha del archivo es sospechosa
+      data.fileLastModified = new Date().toISOString();
+      console.log('⚠️ Fecha de archivo sospechosa detectada, usando fecha actual');
+      console.log(`📅 Fecha del archivo: ${formatFileDate(fileStats.mtime.toISOString())}`);
+      console.log(`📅 Usando fecha actual: ${formatFileDate(data.fileLastModified)}`);
+    } else {
+      data.fileLastModified = fileStats.mtime.toISOString();
+      console.log('✅ Fecha de archivo válida');
+      console.log(`📅 Archivo modificado: ${formatFileDate(data.fileLastModified)}`);
+    }
     
     console.log('✅ Datos de métricas cargados exitosamente');
-    console.log(`📅 Archivo modificado: ${formatFileDate(data.fileLastModified)}`);
     return data;
   } catch (error) {
     console.error('❌ Error al cargar datos de métricas:', error);
@@ -84,6 +96,9 @@ export async function getMetricsData(): Promise<MetricsData> {
         }
       }
     };
+    
+    // En caso de error, usar fecha actual
+    defaultData.fileLastModified = new Date().toISOString();
     
     return defaultData;
   }
