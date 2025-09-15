@@ -21,11 +21,13 @@ function formatCurrency(value: number): string {
 function formatDateShort(dateString: string): string {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    const formatted = date.toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'short',
       timeZone: 'America/Bogota'
     });
+    // Asegurar que termine con punto
+    return formatted.endsWith('.') ? formatted : formatted + '.';
   } catch (error) {
     return dateString; // Si falla, devolver el string original
   }

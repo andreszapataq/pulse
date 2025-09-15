@@ -10,12 +10,15 @@ export default async function Home() {
   // Cargar datos desde el JSON
   const metricsData = await getMetricsData();
   
-  const currentDate = new Date().toLocaleDateString('es-ES', {
+  const currentDateFormatted = new Date().toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
     timeZone: 'America/Bogota'
   });
+  
+  // Asegurar que el mes termine con punto
+  const currentDate = currentDateFormatted.replace(/([a-z]+)( \d{4})/, '$1.$2');
 
   // Usar la fecha de modificación del archivo (automática)
   const fileModifiedTime = metricsData.fileLastModified 
