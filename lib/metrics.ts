@@ -4,12 +4,18 @@ import path from 'path';
 /**
  * Tipos para las métricas
  */
+export interface BreakdownItem {
+  name: string;
+  value: number;
+}
+
 export interface Metric {
   title: string;
   value: number;
   target: number;
   showProgressBar: boolean;
   unit?: string;
+  breakdown?: BreakdownItem[];
 }
 
 export interface MetricsData {
@@ -164,3 +170,4 @@ export function calculatePercentage(value: number, target: number): number {
   if (target === 0) return 0;
   return Math.round((value / target) * 100);
 }
+

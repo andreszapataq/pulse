@@ -1,5 +1,6 @@
 import { getMetricsData, formatFileDate, formatValue, calculatePercentage, type MetricsData } from '@/lib/metrics';
 import AutoRefresh from './components/AutoRefresh';
+import AccordionMetricCard from './components/AccordionMetricCard';
 
 // Configurar revalidación cada 2 minutos (más frecuente para mejor UX)
 export const revalidate = 120;
@@ -83,11 +84,12 @@ export default async function Home() {
 
       {/* Metrics */}
       <div>
-        <MetricCard
+        <AccordionMetricCard
           title={metricsData.metrics.ventas.title}
           value={formatValue(metricsData.metrics.ventas.value, metricsData.metrics.ventas.unit)}
           percentage={`${calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target)}%`}
           showProgressBar={metricsData.metrics.ventas.showProgressBar}
+          breakdown={metricsData.metrics.ventas.breakdown}
         />
         
         <MetricCard

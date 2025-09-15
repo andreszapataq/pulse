@@ -4,9 +4,23 @@
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 22437396,
+      "value": 120000000,
       "target": 150000000,
-      "showProgressBar": true
+      "showProgressBar": true,
+      "breakdown": [
+        {
+          "name": "Medical Supplies",
+          "value": 50000000
+        },
+        {
+          "name": "Phi Fractal",
+          "value": 21000000
+        },
+        {
+          "name": "QNA Medical",
+          "value": 8000000
+        }
+      ]
     },
     "recaudo": {
       "title": "Recaudo",
