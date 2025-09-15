@@ -1,20 +1,20 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-09-15T11:36:00-05:00",
+  "lastUpdated": "2025-09-15T17:07:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 25092755,
+      "value": 41531765,
       "target": 153000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Phi Fractal",
-          "value": 7469928
+          "name": "Medical Supplies",
+          "value": 22818377
         },
         {
-          "name": "Medical Supplies",
-          "value": 7127973
+          "name": "Phi Fractal",
+          "value": 7469928
         },
         {
           "name": "QNA Medical",
