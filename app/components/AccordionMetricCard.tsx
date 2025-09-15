@@ -73,8 +73,8 @@ export default function AccordionMetricCard({
       {hasBreakdown && (
         <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="mt-4 text-xs">
-            <div className="mb-2 text-gray-600">
-              ⚬ {formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
+            <div className="mb-2">
+              🏁 {formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
             </div>
             {breakdown.map((item, index) => (
               <div key={index} className="flex justify-between py-1">
