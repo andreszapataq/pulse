@@ -1,49 +1,10 @@
-import { getMetricsData, formatFileDate, formatValue, calculatePercentage, type MetricsData } from '@/lib/metrics';
+import { getMetricsData, formatFileDate, type MetricsData } from '@/lib/metrics';
 import AutoRefresh from './components/AutoRefresh';
-import AccordionMetricCard from './components/AccordionMetricCard';
+import MetricsDisplay from './components/MetricsDisplay';
 
 // Configurar revalidación cada 2 minutos (más frecuente para mejor UX)
 export const revalidate = 120;
 
-interface MetricCardProps {
-  title: string;
-  value: string;
-  percentage?: string;
-  showProgressBar?: boolean;
-}
-
-function MetricCard({ title, value, percentage, showProgressBar = false }: MetricCardProps) {
-  const getProgressWidth = () => {
-    if (!percentage) return '0%';
-    return percentage;
-  };
-
-  return (
-    <div className="mb-10">
-      <h2 className="text-base font-medium leading-tight">
-        {title}
-      </h2>
-      <div className="flex justify-between items-baseline mb-[3px]">
-        <div className="text-xl font-normal">
-          {value}
-        </div>
-        {percentage && (
-          <span className="text-sm font-normal text-gray-500">
-            {percentage}
-          </span>
-        )}
-      </div>
-      {showProgressBar && (
-        <div className="w-full h-[10px]">
-          <div 
-            className="bg-linear-to-r from-background to-foreground h-full" 
-            style={{ width: getProgressWidth() }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default async function Home() {
   // Cargar datos desde el JSON
@@ -83,48 +44,7 @@ export default async function Home() {
       </div>
 
       {/* Metrics */}
-      <div>
-        <AccordionMetricCard
-          title={metricsData.metrics.ventas.title}
-          value={formatValue(metricsData.metrics.ventas.value, metricsData.metrics.ventas.unit)}
-          percentage={`${calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target)}%`}
-          showProgressBar={metricsData.metrics.ventas.showProgressBar}
-          breakdown={metricsData.metrics.ventas.breakdown}
-          listStyle="numbers"
-        />
-        
-        <AccordionMetricCard
-          title={metricsData.metrics.recaudo.title}
-          value={formatValue(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.unit)}
-          percentage={`${calculatePercentage(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.target)}%`}
-          showProgressBar={metricsData.metrics.recaudo.showProgressBar}
-          breakdown={metricsData.metrics.recaudo.breakdown}
-          listStyle="bullets"
-        />
-        
-        <AccordionMetricCard
-          title={metricsData.metrics.inventario.title}
-          value={formatValue(metricsData.metrics.inventario.value, metricsData.metrics.inventario.unit)}
-          percentage={`${calculatePercentage(metricsData.metrics.inventario.value, metricsData.metrics.inventario.target)}%`}
-          showProgressBar={metricsData.metrics.inventario.showProgressBar}
-          breakdown={metricsData.metrics.inventario.breakdown}
-          listStyle="numbers"
-        />
-        
-        <MetricCard
-          title={metricsData.metrics.margen.title}
-          value={formatValue(metricsData.metrics.margen.value, metricsData.metrics.margen.unit)}
-          percentage={`${calculatePercentage(metricsData.metrics.margen.value, metricsData.metrics.margen.target)}%`}
-          showProgressBar={metricsData.metrics.margen.showProgressBar}
-        />
-        
-        <MetricCard
-          title={metricsData.metrics.caja.title}
-          value={formatValue(metricsData.metrics.caja.value, metricsData.metrics.caja.unit)}
-          percentage={`${calculatePercentage(metricsData.metrics.caja.value, metricsData.metrics.caja.target)}%`}
-          showProgressBar={metricsData.metrics.caja.showProgressBar}
-        />
-      </div>
+      <MetricsDisplay metricsData={metricsData} />
 
       {/* Footer with automatic file modification time */}
       <div className="mt-22 text-center">

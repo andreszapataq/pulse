@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+// Estado controlado desde el componente padre
 
 interface BreakdownItem {
   name: string;
@@ -38,6 +38,8 @@ interface AccordionMetricCardProps {
   showProgressBar?: boolean;
   breakdown?: BreakdownItem[];
   listStyle?: 'numbers' | 'bullets';
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 export default function AccordionMetricCard({ 
@@ -46,9 +48,10 @@ export default function AccordionMetricCard({
   percentage, 
   showProgressBar = false, 
   breakdown,
-  listStyle = 'numbers'
+  listStyle = 'numbers',
+  isExpanded = false,
+  onToggle
 }: AccordionMetricCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const getProgressWidth = () => {
     if (!percentage) return '0%';
@@ -61,7 +64,7 @@ export default function AccordionMetricCard({
     <div className="mb-10">
       <div 
         className={`${hasBreakdown ? 'cursor-pointer' : ''}`}
-        onClick={() => hasBreakdown && setIsExpanded(!isExpanded)}
+        onClick={() => hasBreakdown && onToggle && onToggle()}
       >
         <h2 className="text-base font-medium leading-tight">
           {title}
