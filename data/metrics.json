@@ -4,28 +4,28 @@
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 120000000,
-      "target": 150000000,
+      "value": 22437396,
+      "target": 153000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Medical Supplies",
-          "value": 50000000
+          "name": "Phi Fractal",
+          "value": 6595555
         },
         {
-          "name": "Phi Fractal",
-          "value": 21000000
+          "name": "Medical Supplies",
+          "value": 5346987
         },
         {
           "name": "QNA Medical",
-          "value": 8000000
+          "value": 4984652
         }
       ]
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 135000000,
-      "target": 150000000,
+      "value": 53931096,
+      "target": 153000000,
       "showProgressBar": true,
       "breakdown": [
         {
@@ -47,21 +47,21 @@
     },
     "inventario": {
       "title": "Inventario",
-      "value": 300000000,
-      "target": 300000000,
+      "value": 125036710,
+      "target": 153000000,
       "showProgressBar": true,
       "breakdown": [
         {
           "name": "TPN",
-          "value": 120000000
+          "value":  83598321
         },
         {
           "name": "DBM",
-          "value": 100000000
+          "value":  31826837
         },
         {
           "name": "CDM",
-          "value": 80000000
+          "value":  9047290
         }
       ]
     },
@@ -74,8 +74,8 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  67978688,
-      "target": 100000000,
+      "value":  67219615,
+      "target": 153000000,
       "showProgressBar": true
     }
   }
