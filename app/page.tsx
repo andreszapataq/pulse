@@ -90,20 +90,25 @@ export default async function Home() {
           percentage={`${calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target)}%`}
           showProgressBar={metricsData.metrics.ventas.showProgressBar}
           breakdown={metricsData.metrics.ventas.breakdown}
+          listStyle="numbers"
         />
         
-        <MetricCard
+        <AccordionMetricCard
           title={metricsData.metrics.recaudo.title}
           value={formatValue(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.unit)}
           percentage={`${calculatePercentage(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.target)}%`}
           showProgressBar={metricsData.metrics.recaudo.showProgressBar}
+          breakdown={metricsData.metrics.recaudo.breakdown}
+          listStyle="bullets"
         />
         
-        <MetricCard
+        <AccordionMetricCard
           title={metricsData.metrics.inventario.title}
           value={formatValue(metricsData.metrics.inventario.value, metricsData.metrics.inventario.unit)}
           percentage={`${calculatePercentage(metricsData.metrics.inventario.value, metricsData.metrics.inventario.target)}%`}
           showProgressBar={metricsData.metrics.inventario.showProgressBar}
+          breakdown={metricsData.metrics.inventario.breakdown}
+          listStyle="numbers"
         />
         
         <MetricCard

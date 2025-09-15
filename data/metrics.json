@@ -24,15 +24,46 @@
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 53931096,
+      "value": 135000000,
       "target": 150000000,
-      "showProgressBar": true
+      "showProgressBar": true,
+      "breakdown": [
+        {
+          "name": "Medical Supplies",
+          "value": 50000000,
+          "date": "2025-09-09"
+        },
+        {
+          "name": "Implameq",
+          "value": 1801209,
+          "date": "2025-09-02"
+        },
+        {
+          "name": "CSSP",
+          "value": 2129887,
+          "date": "2025-09-01"
+        }
+      ]
     },
     "inventario": {
       "title": "Inventario",
-      "value": 122992365,
-      "target": 150000000,
-      "showProgressBar": true
+      "value": 300000000,
+      "target": 300000000,
+      "showProgressBar": true,
+      "breakdown": [
+        {
+          "name": "TPN",
+          "value": 120000000
+        },
+        {
+          "name": "DBM",
+          "value": 100000000
+        },
+        {
+          "name": "CDM",
+          "value": 80000000
+        }
+      ]
     },
     "margen": {
       "title": "Margen",

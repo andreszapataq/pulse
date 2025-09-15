@@ -5,6 +5,7 @@ import { useState } from 'react';
 interface BreakdownItem {
   name: string;
   value: number;
+  date?: string;
 }
 
 // Función local para formatear moneda (evita imports problemáticos)
@@ -16,12 +17,27 @@ function formatCurrency(value: number): string {
   return `$${numberFormatted}`;
 }
 
+// Función para formatear fecha sin año (ej: "9 sep.")
+function formatDateShort(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'America/Bogota'
+    });
+  } catch (error) {
+    return dateString; // Si falla, devolver el string original
+  }
+}
+
 interface AccordionMetricCardProps {
   title: string;
   value: string;
   percentage?: string;
   showProgressBar?: boolean;
   breakdown?: BreakdownItem[];
+  listStyle?: 'numbers' | 'bullets';
 }
 
 export default function AccordionMetricCard({ 
@@ -29,7 +45,8 @@ export default function AccordionMetricCard({
   value, 
   percentage, 
   showProgressBar = false, 
-  breakdown 
+  breakdown,
+  listStyle = 'numbers'
 }: AccordionMetricCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -79,7 +96,7 @@ export default function AccordionMetricCard({
             {breakdown.map((item, index) => (
               <div key={index} className="flex justify-between py-1">
                 <span className="text-gray-700">
-                  {index + 1}. {item.name}:
+                  {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
                 </span>
                 <span className="font-medium">
                   {formatCurrency(item.value)}

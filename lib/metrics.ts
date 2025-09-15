@@ -7,6 +7,7 @@ import path from 'path';
 export interface BreakdownItem {
   name: string;
   value: number;
+  date?: string;
 }
 
 export interface Metric {
