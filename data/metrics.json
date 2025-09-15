@@ -4,17 +4,17 @@
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 22437396,
+      "value": 25092755,
       "target": 153000000,
       "showProgressBar": true,
       "breakdown": [
         {
           "name": "Phi Fractal",
-          "value": 6595555
+          "value": 7469928
         },
         {
           "name": "Medical Supplies",
-          "value": 5346987
+          "value": 7127973
         },
         {
           "name": "QNA Medical",
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  67219615,
+      "value":  67219800,
       "target": 153000000,
       "showProgressBar": true
     }
