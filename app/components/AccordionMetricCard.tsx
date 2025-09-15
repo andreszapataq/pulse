@@ -42,6 +42,7 @@ interface AccordionMetricCardProps {
   listStyle?: 'numbers' | 'bullets';
   isExpanded?: boolean;
   onToggle?: () => void;
+  target?: number;
 }
 
 export default function AccordionMetricCard({ 
@@ -52,7 +53,8 @@ export default function AccordionMetricCard({
   breakdown,
   listStyle = 'numbers',
   isExpanded = false,
-  onToggle
+  onToggle,
+  target
 }: AccordionMetricCardProps) {
 
   const getProgressWidth = () => {
@@ -95,8 +97,8 @@ export default function AccordionMetricCard({
       {hasBreakdown && (
         <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="mt-4 text-xs">
-            <div className="mb-2">
-              🏁 {formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
+            <div className="mb-2 text-sm">
+              🏁 {target ? formatCurrency(target) : formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
             </div>
             {breakdown.map((item, index) => (
               <div key={index} className="flex justify-between py-1">

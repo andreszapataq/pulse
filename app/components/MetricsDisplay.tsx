@@ -87,6 +87,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
         listStyle="numbers"
         isExpanded={expandedAccordion === 'ventas'}
         onToggle={() => handleAccordionToggle('ventas')}
+        target={metricsData.metrics.ventas.target}
       />
       
       <AccordionMetricCard
@@ -98,6 +99,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
         listStyle="bullets"
         isExpanded={expandedAccordion === 'recaudo'}
         onToggle={() => handleAccordionToggle('recaudo')}
+        target={metricsData.metrics.recaudo.target}
       />
       
       <AccordionMetricCard
@@ -109,6 +111,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
         listStyle="numbers"
         isExpanded={expandedAccordion === 'inventario'}
         onToggle={() => handleAccordionToggle('inventario')}
+        target={metricsData.metrics.inventario.target}
       />
       
       <MetricCard
