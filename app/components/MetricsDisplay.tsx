@@ -25,6 +25,19 @@ function calculatePercentage(value: number, target: number): number {
   return Math.round((value / target) * 100);
 }
 
+// Nueva función para formatear porcentaje con "+" cuando supera 100%
+function formatPercentageDisplay(percentage: number): string {
+  if (percentage > 100) {
+    return '+100%';
+  }
+  return `${percentage}%`;
+}
+
+// Nueva función para obtener el ancho de la barra (máximo 100%)
+function getProgressBarWidth(percentage: number): string {
+  return `${Math.min(percentage, 100)}%`;
+}
+
 interface MetricCardProps {
   title: string;
   value: string;
@@ -35,7 +48,9 @@ interface MetricCardProps {
 function MetricCard({ title, value, percentage, showProgressBar = false }: MetricCardProps) {
   const getProgressWidth = () => {
     if (!percentage) return '0%';
-    return percentage;
+    // Extraer el número del porcentaje y limitar a 100%
+    const percentageNumber = parseInt(percentage.replace('%', ''));
+    return getProgressBarWidth(percentageNumber);
   };
 
   return (
@@ -81,7 +96,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
       <AccordionMetricCard
         title={metricsData.metrics.ventas.title}
         value={formatValue(metricsData.metrics.ventas.value, metricsData.metrics.ventas.unit)}
-        percentage={`${calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target)}%`}
+        percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target))}
         showProgressBar={metricsData.metrics.ventas.showProgressBar}
         breakdown={metricsData.metrics.ventas.breakdown}
         listStyle="numbers"
@@ -93,7 +108,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
       <AccordionMetricCard
         title={metricsData.metrics.recaudo.title}
         value={formatValue(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.unit)}
-        percentage={`${calculatePercentage(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.target)}%`}
+        percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.target))}
         showProgressBar={metricsData.metrics.recaudo.showProgressBar}
         breakdown={metricsData.metrics.recaudo.breakdown}
         listStyle="bullets"
@@ -105,7 +120,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
       <AccordionMetricCard
         title={metricsData.metrics.inventario.title}
         value={formatValue(metricsData.metrics.inventario.value, metricsData.metrics.inventario.unit)}
-        percentage={`${calculatePercentage(metricsData.metrics.inventario.value, metricsData.metrics.inventario.target)}%`}
+        percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.inventario.value, metricsData.metrics.inventario.target))}
         showProgressBar={metricsData.metrics.inventario.showProgressBar}
         breakdown={metricsData.metrics.inventario.breakdown}
         listStyle="numbers"
@@ -117,14 +132,14 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
       <MetricCard
         title={metricsData.metrics.margen.title}
         value={formatValue(metricsData.metrics.margen.value, metricsData.metrics.margen.unit)}
-        percentage={`${calculatePercentage(metricsData.metrics.margen.value, metricsData.metrics.margen.target)}%`}
+        percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.margen.value, metricsData.metrics.margen.target))}
         showProgressBar={metricsData.metrics.margen.showProgressBar}
       />
       
       <MetricCard
         title={metricsData.metrics.caja.title}
         value={formatValue(metricsData.metrics.caja.value, metricsData.metrics.caja.unit)}
-        percentage={`${calculatePercentage(metricsData.metrics.caja.value, metricsData.metrics.caja.target)}%`}
+        percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.caja.value, metricsData.metrics.caja.target))}
         showProgressBar={metricsData.metrics.caja.showProgressBar}
       />
     </div>

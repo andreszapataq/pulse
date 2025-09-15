@@ -24,7 +24,7 @@ function formatDateShort(dateString: string): string {
     const formatted = date.toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'short',
-      timeZone: 'America/Bogota'
+      timeZone: 'UTC'
     });
     // Asegurar que termine con punto
     return formatted.endsWith('.') ? formatted : formatted + '.';
@@ -59,7 +59,9 @@ export default function AccordionMetricCard({
 
   const getProgressWidth = () => {
     if (!percentage) return '0%';
-    return percentage;
+    // Extraer el número del porcentaje y limitar a 100%
+    const percentageNumber = parseInt(percentage.replace(/[+%]/g, ''));
+    return `${Math.min(percentageNumber, 100)}%`;
   };
 
   const hasBreakdown = breakdown && breakdown.length > 0;
