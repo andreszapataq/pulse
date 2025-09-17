@@ -1,16 +1,16 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-09-16T10:00:00-05:00",
+  "lastUpdated": "2025-09-17T10:40:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 41531765,
+      "value": 48671825,
       "target": 153000000,
       "showProgressBar": true,
       "breakdown": [
         {
           "name": "Medical Supplies",
-          "value": 22818377
+          "value": 29958437
         },
         {
           "name": "Phi Fractal",
@@ -47,7 +47,7 @@
     },
     "inventario": {
       "title": "Inventario",
-      "value": 125036710,
+      "value": 126257686,
       "target": 110160000,
       "showProgressBar": true,
       "breakdown": [
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  40512457,
+      "value":  40382704,
       "target": 153000000,
       "showProgressBar": true
     }
