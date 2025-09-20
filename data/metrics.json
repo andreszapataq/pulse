@@ -1,6 +1,6 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-09-19T08:10:00-05:00",
+  "lastUpdated": "2025-09-19T23:55:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  1610264,
+      "value":  46695565,
       "target": 153000000,
       "showProgressBar": true
     }
