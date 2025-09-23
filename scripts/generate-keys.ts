@@ -13,7 +13,7 @@
  *   npx tsx scripts/generate-keys.ts
  */
 
-import { generateRSAKeyPair, validateRSAKeySize } from '../lib/crypto';
+import { generateRSAKeyPair, validateRSAKeySize, type RSAPublicJWK } from '../lib/crypto';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 
@@ -35,7 +35,7 @@ async function main() {
 
     console.log('✅ Llaves generadas exitosamente');
     console.log(`🆔 Key ID: ${keyId}`);
-    console.log(`📏 Tamaño verificado: ${Buffer.from(jwk.n, 'base64url').length * 8} bits`);
+    console.log(`📏 Tamaño verificado: ${Buffer.from((jwk as any).n, 'base64url').length * 8} bits`);
     console.log('');
 
     // Mostrar la información que necesitas copiar

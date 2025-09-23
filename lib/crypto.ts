@@ -72,7 +72,7 @@ export async function privateKeyToPublicJWK(privateKeyPEM: string, keyId: string
  * @param jwk Llave en formato JWK
  * @returns true si cumple los requisitos del banco
  */
-export function validateRSAKeySize(jwk: any): boolean {
+export function validateRSAKeySize(jwk: RSAPublicJWK | any): boolean {
   if (jwk.kty !== 'RSA') {
     return false;
   }
