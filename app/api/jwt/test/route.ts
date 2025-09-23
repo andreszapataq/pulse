@@ -52,8 +52,9 @@ export async function GET() {
       scope: ['read:balance', 'read:transactions']
     });
 
-    // Obtener información del endpoint JWKS
-    const jwksUrl = `${getAppUrl()}/.well-known/jwks.json`;
+    // Obtener información de los endpoints JWKS
+    const jwksUrlStandard = `${getAppUrl()}/.well-known/jwks.json`;
+    const jwksUrlAlternative = `${getAppUrl()}/api/jwks`;
     
     console.log('✅ JWT de prueba generado exitosamente');
     
@@ -63,7 +64,8 @@ export async function GET() {
       config: {
         keyId: keyId,
         privateKeyConfigured: true,
-        jwksEndpoint: jwksUrl,
+        jwksEndpointStandard: jwksUrlStandard,
+        jwksEndpointAlternative: jwksUrlAlternative,
         appUrl: getAppUrl()
       },
       test: {
@@ -80,9 +82,9 @@ export async function GET() {
         }
       },
       nextSteps: [
-        '1. Verifica el endpoint JWKS: ' + jwksUrl,
-        '2. Configura las mismas variables en Vercel',
-        '3. Despliega la aplicación',
+        '1. Verifica el endpoint JWKS estándar: ' + jwksUrlStandard,
+        '2. Verifica el endpoint JWKS alternativo: ' + jwksUrlAlternative,
+        '3. Usa cualquiera de las dos URLs para el banco',
         '4. Proporciona la URL JWKS al banco'
       ]
     });

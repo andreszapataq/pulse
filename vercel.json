@@ -1,0 +1,27 @@
+{
+  "rewrites": [
+    {
+      "source": "/.well-known/jwks.json",
+      "destination": "/api/jwks"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/jwks",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    }
+  ]
+}
