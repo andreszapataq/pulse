@@ -6,6 +6,18 @@
 import * as jose from 'node-jose';
 
 /**
+ * Tipo para JWK RSA público
+ */
+export interface RSAPublicJWK {
+  kty: 'RSA';
+  kid: string;
+  use: 'sig';
+  alg: 'RS256';
+  n: string;  // Módulo RSA en base64url
+  e: string;  // Exponente público en base64url
+}
+
+/**
  * Genera un par de llaves RSA de 2048 bits para JWT
  * @returns Par de llaves en diferentes formatos
  */
@@ -33,7 +45,7 @@ export async function generateRSAKeyPair() {
  * @param keyId ID único para la llave
  * @returns JWK público para el endpoint JWKS
  */
-export async function privateKeyToPublicJWK(privateKeyPEM: string, keyId: string) {
+export async function privateKeyToPublicJWK(privateKeyPEM: string, keyId: string): Promise<RSAPublicJWK> {
   try {
     // Crear objeto JWK desde la llave privada PEM
     const key = await jose.JWK.asKey(privateKeyPEM, 'pem');
@@ -48,7 +60,7 @@ export async function privateKeyToPublicJWK(privateKeyPEM: string, keyId: string
       alg: 'RS256',        // Algoritmo
       use: 'sig',          // Uso: firma
       kty: 'RSA'           // Tipo de llave: RSA
-    };
+    } as RSAPublicJWK;
   } catch (error) {
     console.error('Error convirtiendo llave privada a JWK público:', error);
     throw new Error('Error procesando llave RSA');

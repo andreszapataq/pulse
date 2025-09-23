@@ -13,7 +13,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { privateKeyToPublicJWK, validateRSAKeySize } from '@/lib/crypto';
+import { privateKeyToPublicJWK, validateRSAKeySize, type RSAPublicJWK } from '@/lib/crypto';
 
 /**
  * GET /.well-known/jwks.json
