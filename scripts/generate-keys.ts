@@ -77,7 +77,7 @@ async function main() {
       writeFileSync(join(keyDir, `public-key-${timestamp}.pem`), publicKey);
       writeFileSync(join(keyDir, `jwk-${timestamp}.json`), JSON.stringify(jwk, null, 2));
       writeFileSync(join(keyDir, `key-info-${timestamp}.txt`), 
-        `Key ID: ${keyId}\nGenerated: ${new Date().toISOString()}\nSize: ${Buffer.from(jwk.n, 'base64url').length * 8} bits\nAlgorithm: RS256\n`
+        `Key ID: ${keyId}\nGenerated: ${new Date().toISOString()}\nSize: ${Buffer.from((jwk as any).n, 'base64url').length * 8} bits\nAlgorithm: RS256\n`
       );
 
       console.log('💾 Archivos guardados en ./keys/ para referencia');
