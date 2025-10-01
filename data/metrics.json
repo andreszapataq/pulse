@@ -1,6 +1,6 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-09-29T18:05:00-05:00",
+  "lastUpdated": "2025-10-01T08:20:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
@@ -24,10 +24,15 @@
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 211426191,
+      "value": 316422251,
       "target": 197000000,
       "showProgressBar": true,
       "breakdown": [
+        {
+          "name": "Phi Fractal",
+          "value": 104996060,
+          "date": "2025-09-30"
+        },
         {
           "name": "Feya",
           "value": 864726,
@@ -37,11 +42,6 @@
           "name": "Imtrauma",
           "value": 1172827,
           "date": "2025-09-26"
-        },
-        {
-          "name": "Phi Fractal",
-          "value": 9958318,
-          "date": "2025-09-24"
         }
       ]
     },
@@ -74,8 +74,8 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  41635191,
-      "target": 153000000,
+      "value":  36512833,
+      "target": 100000000,
       "showProgressBar": true
     }
   }
