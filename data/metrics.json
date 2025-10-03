@@ -1,47 +1,47 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-01T08:20:00-05:00",
+  "lastUpdated": "2025-10-03T18:06:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 305770078,
+      "value": 18413292,
       "target": 197000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Medical Supplies",
-          "value": 168810855
-        },
-        {
-          "name": "Phi Fractal",
-          "value": 117646679
-        },
-        {
           "name": "QNA Medical",
-          "value": 4984652
+          "value": 18413292
+        },
+        {
+          "name": "-",
+          "value": 0
+        },
+        {
+          "name": "-",
+          "value": 0
         }
       ]
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 316422251,
+      "value": 5659597,
       "target": 197000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Phi Fractal",
-          "value": 104996060,
-          "date": "2025-09-30"
+          "name": "Hospitalarte",
+          "value": 5659597,
+          "date": "2025-10-03"
         },
         {
-          "name": "Feya",
-          "value": 864726,
-          "date": "2025-09-29"
+          "name": "-",
+          "value": 0,
+          "date": "2025-10-02"
         },
         {
-          "name": "Imtrauma",
-          "value": 1172827,
-          "date": "2025-09-26"
+          "name": "-",
+          "value": 0,
+          "date": "2025-10-01"
         }
       ]
     },
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  36512833,
+      "value":  40030770,
       "target": 100000000,
       "showProgressBar": true
     }
