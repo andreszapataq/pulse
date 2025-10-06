@@ -1,20 +1,20 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-03T18:06:00-05:00",
+  "lastUpdated": "2025-10-06T15:00:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 18413292,
+      "value": 10953700,
       "target": 197000000,
       "showProgressBar": true,
       "breakdown": [
         {
           "name": "QNA Medical",
-          "value": 18413292
+          "value": 9927700
         },
         {
-          "name": "-",
-          "value": 0
+          "name": "Feya",
+          "value": 1026000
         },
         {
           "name": "-",
@@ -47,8 +47,8 @@
     },
     "inventario": {
       "title": "Inventario",
-      "value":   172322245,
-      "target": 153000000,
+      "value":   167624489,
+      "target": 100000000,
       "showProgressBar": true,
       "breakdown": [
         {
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  40030770,
+      "value":  39497706,
       "target": 100000000,
       "showProgressBar": true
     }
