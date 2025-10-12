@@ -1,10 +1,10 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-06T15:00:00-05:00",
+  "lastUpdated": "2025-10-12T17:50:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 10953700,
+      "value": 13546656,
       "target": 197000000,
       "showProgressBar": true,
       "breakdown": [
@@ -14,40 +14,40 @@
         },
         {
           "name": "Feya",
-          "value": 1026000
+          "value": 2142000
         },
         {
-          "name": "-",
-          "value": 0
+          "name": "Clínica Pinares",
+          "value": 1476956
         }
       ]
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 5659597,
+      "value": 7647344,
       "target": 197000000,
       "showProgressBar": true,
       "breakdown": [
         {
+          "name": "Medical Duarte",
+          "value": 1078741,
+          "date": "2025-10-09"
+        },
+        {
+          "name": "S.I. Silva",
+          "value": 909006,
+          "date": "2025-10-07"
+        },
+        {
           "name": "Hospitalarte",
           "value": 5659597,
           "date": "2025-10-03"
-        },
-        {
-          "name": "-",
-          "value": 0,
-          "date": "2025-10-02"
-        },
-        {
-          "name": "-",
-          "value": 0,
-          "date": "2025-10-01"
         }
       ]
     },
     "inventario": {
       "title": "Inventario",
-      "value":   167624489,
+      "value":   164241592,
       "target": 100000000,
       "showProgressBar": true,
       "breakdown": [
@@ -57,11 +57,11 @@
         },
         {
           "name": "Chips Dora",
-          "value":  14719463
+          "value":  15086042
         },
         {
           "name": "TPN",
-          "value":  80855433
+          "value":  71051904
         }
       ]
     },
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value":  39497706,
+      "value":  30819987,
       "target": 100000000,
       "showProgressBar": true
     }
