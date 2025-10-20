@@ -1,80 +1,80 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-18T09:40:00-05:00",
+  "lastUpdated": "2025-10-20T17:00:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 13546656,
-      "target": 197000000,
+      "value": 70779085,
+      "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "QNA Medical",
-          "value": 9927700
+          "name": "Medical Supplies",
+          "value": 45564224
         },
         {
-          "name": "Feya",
-          "value": 2142000
+          "name": "QNA Medical",
+          "value": 19447924
         },
         {
           "name": "Clínica Pinares",
-          "value": 1476956
+          "value": 2974168
         }
       ]
     },
     "recaudo": {
       "title": "Recaudo",
       "value": 72658455,
-      "target": 197000000,
+      "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Medical Duarte",
-          "value": 1078741,
-          "date": "2025-10-09"
+          "name": "Medical Supplies",
+          "value": 60000000,
+          "date": "2025-10-16"
+        },
+        {
+          "name": "Phi Fractal",
+          "value": 1508801,
+          "date": "2025-10-15"
         },
         {
           "name": "S.I. Silva",
-          "value": 909006,
-          "date": "2025-10-07"
-        },
-        {
-          "name": "Hospitalarte",
-          "value": 5659597,
-          "date": "2025-10-03"
+          "value": 650769,
+          "date": "2025-10-15"
         }
       ]
     },
     "inventario": {
       "title": "Inventario",
-      "value":   164241592,
+      "value":  125983418,
       "target": 100000000,
       "showProgressBar": true,
       "breakdown": [
         {
           "name": "Putty Dora",
-          "value":  38020144
+          "value": 12961444
         },
         {
           "name": "Chips Dora",
-          "value":  15086042
+          "value": 8877749
         },
         {
-          "name": "TPN",
-          "value":  71051904
+          "name": "Bloques Dora",
+          "value": 3689616
         }
       ]
     },
     "margen": {
       "title": "Margen",
-      "value": 28,
+      "value": 25,
       "target": 30,
       "showProgressBar": true,
       "unit": "%"
     },
     "caja": {
       "title": "Caja",
-      "value":  62422183,
+      "value": 29751406,
       "target": 100000000,
       "showProgressBar": true
     }
