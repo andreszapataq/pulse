@@ -1,52 +1,52 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-20T18:00:00-05:00",
+  "lastUpdated": "2025-10-28T15:00:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 70779085,
+      "value": 115968001,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
           "name": "Medical Supplies",
-          "value": 45564224
+          "value": 64542604
         },
         {
           "name": "QNA Medical",
-          "value": 19447924
+          "value": 33559219
         },
         {
-          "name": "Clínica Pinares",
-          "value": 2974168
+          "name": "CSSP",
+          "value": 9518916
         }
       ]
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 72658455,
+      "value": 205623821,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
+          "name": "Dumian Medical",
+          "value": 48374782,
+          "date": "2025-10-27"
+        },
+        {
           "name": "Medical Supplies",
-          "value": 60000000,
-          "date": "2025-10-16"
+          "value": 70000000,
+          "date": "2025-10-27"
         },
         {
-          "name": "Phi Fractal",
-          "value": 1508801,
-          "date": "2025-10-15"
-        },
-        {
-          "name": "S.I. Silva",
-          "value": 650769,
-          "date": "2025-10-15"
+          "name": "Medical Supplies",
+          "value": 14590584,
+          "date": "2025-10-23"
         }
       ]
     },
     "inventario": {
-      "title": "Inventario",
+      "title": "🟡 Inventario",
       "value":  125983418,
       "target": 100000000,
       "showProgressBar": true,
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value": 29751406,
+      "value": 111445919,
       "target": 100000000,
       "showProgressBar": true
     }
