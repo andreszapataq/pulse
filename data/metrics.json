@@ -1,6 +1,6 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-28T15:00:00-05:00",
+  "lastUpdated": "2025-10-31T17:30:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
@@ -24,10 +24,15 @@
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 205623821,
+      "value": 209201539,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
+        {
+          "name": "Alternativas Ortopédicas",
+          "value": 3577718,
+          "date": "2025-10-29"
+        },
         {
           "name": "Dumian Medical",
           "value": 48374782,
@@ -37,11 +42,6 @@
           "name": "Medical Supplies",
           "value": 70000000,
           "date": "2025-10-27"
-        },
-        {
-          "name": "Medical Supplies",
-          "value": 14590584,
-          "date": "2025-10-23"
         }
       ]
     },
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value": 111445919,
+      "value": 111408474,
       "target": 100000000,
       "showProgressBar": true
     }
