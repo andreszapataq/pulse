@@ -1,66 +1,66 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-10-31T17:30:00-05:00",
+  "lastUpdated": "2025-11-05T11:00:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 115968001,
+      "value": 2205306,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Medical Supplies",
-          "value": 64542604
+          "name": "Clínica Pinares",
+          "value": 2205306
         },
         {
-          "name": "QNA Medical",
-          "value": 33559219
+          "name": "-",
+          "value": 0
         },
         {
-          "name": "CSSP",
-          "value": 9518916
+          "name": "-",
+          "value": 0
         }
       ]
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 209201539,
+      "value": 0,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Alternativas Ortopédicas",
-          "value": 3577718,
-          "date": "2025-10-29"
+          "name": "-",
+          "value": 0,
+          "date": "2025-11-05"
         },
         {
-          "name": "Dumian Medical",
-          "value": 48374782,
-          "date": "2025-10-27"
+          "name": "-",
+          "value": 0,
+          "date": "2025-11-04"
         },
         {
-          "name": "Medical Supplies",
-          "value": 70000000,
-          "date": "2025-10-27"
+          "name": "-",
+          "value": 0,
+          "date": "2025-11-03"
         }
       ]
     },
     "inventario": {
-      "title": "🟡 Inventario",
-      "value":  125983418,
+      "title": "Inventario",
+      "value":  109028899,
       "target": 100000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Putty Dora",
+          "name": "🟡 Putty Dora",
           "value": 12961444
         },
         {
-          "name": "Chips Dora",
+          "name": "🟡 Chips Dora",
           "value": 8877749
         },
         {
-          "name": "Bloques Dora",
+          "name": "🟡 Bloques Dora",
           "value": 3689616
         }
       ]
@@ -74,7 +74,7 @@
     },
     "caja": {
       "title": "Caja",
-      "value": 111408474,
+      "value": 38752903,
       "target": 100000000,
       "showProgressBar": true
     }
