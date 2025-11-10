@@ -1,20 +1,20 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-11-05T11:00:00-05:00",
+  "lastUpdated": "2025-11-10T14:45:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 2205306,
+      "value": 7455578,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
-          "name": "Clínica Pinares",
-          "value": 2205306
+          "name": "QNA Medical",
+          "value": 5230016
         },
         {
-          "name": "-",
-          "value": 0
+          "name": "Clínica Pinares",
+          "value": 2205306
         },
         {
           "name": "-",
@@ -24,30 +24,30 @@
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 0,
+      "value": 5519821,
       "target": 180000000,
       "showProgressBar": true,
       "breakdown": [
         {
+          "name": "CMS Colombia",
+          "value": 1612021,
+          "date": "2025-11-07"
+        },
+        {
+          "name": "Quirófanos 2Sur",
+          "value": 3907800,
+          "date": "2025-11-06"
+        },
+        {
           "name": "-",
           "value": 0,
           "date": "2025-11-05"
-        },
-        {
-          "name": "-",
-          "value": 0,
-          "date": "2025-11-04"
-        },
-        {
-          "name": "-",
-          "value": 0,
-          "date": "2025-11-03"
         }
       ]
     },
     "inventario": {
       "title": "Inventario",
-      "value":  109028899,
+      "value":  106172169,
       "target": 100000000,
       "showProgressBar": true,
       "breakdown": [
@@ -67,14 +67,14 @@
     },
     "margen": {
       "title": "Margen",
-      "value": 25,
+      "value": 21,
       "target": 30,
       "showProgressBar": true,
       "unit": "%"
     },
     "caja": {
       "title": "Caja",
-      "value": 38752903,
+      "value": 41265812,
       "target": 100000000,
       "showProgressBar": true
     }
