@@ -1,6 +1,7 @@
 'use client';
 
 // Estado controlado desde el componente padre
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 interface BreakdownItem {
   name: string;
@@ -56,6 +57,7 @@ export default function AccordionMetricCard({
   onToggle,
   target
 }: AccordionMetricCardProps) {
+  const shouldReduceMotion = useReducedMotion();
 
   const getProgressWidth = () => {
     if (!percentage) return '0%';
@@ -67,7 +69,7 @@ export default function AccordionMetricCard({
   const hasBreakdown = breakdown && breakdown.length > 0;
 
   return (
-    <div className="mb-10">
+    <motion.div layout className="mb-10">
       <div 
         className={`${hasBreakdown ? 'cursor-pointer' : ''}`}
         onClick={() => hasBreakdown && onToggle && onToggle()}
@@ -97,24 +99,39 @@ export default function AccordionMetricCard({
 
       {/* Breakdown section */}
       {hasBreakdown && (
-        <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="mt-4 text-xs">
-            <div className="mb-2 text-sm">
-              🏁 {target ? formatCurrency(target) : formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
-            </div>
-            {breakdown.map((item, index) => (
-              <div key={index} className="flex justify-between py-1">
-                <span className="text-gray-700">
-                  {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
-                </span>
-                <span className="font-medium">
-                  {formatCurrency(item.value)}
-                </span>
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              key="breakdown"
+              initial={shouldReduceMotion ? false : { height: 0, opacity: 0, y: -4 }}
+              animate={shouldReduceMotion ? { height: 'auto', opacity: 1, y: 0 } : { height: 'auto', opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? { height: 0, opacity: 0 } : { height: 0, opacity: 0, y: -4 }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0.01 }
+                  : { type: 'spring', stiffness: 320, damping: 30, mass: 0.55 }
+              }
+              className="overflow-hidden"
+            >
+              <div className="mt-4 text-xs">
+                <div className="mb-2 text-sm">
+                  🏁 {target ? formatCurrency(target) : formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
+                </div>
+                {breakdown.map((item, index) => (
+                  <div key={index} className="flex justify-between py-1">
+                    <span className="text-gray-700">
+                      {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(item.value)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
-    </div>
+    </motion.div>
   );
 }
