@@ -1,12 +1,20 @@
-import { getMetricsData, formatFileDate, type MetricsData } from '@/lib/metrics';
+import { getMetricsData, formatFileDate } from '@/lib/metrics';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import AutoRefresh from './components/AutoRefresh';
 import MetricsDisplay from './components/MetricsDisplay';
-
-// Configurar revalidación cada 2 minutos (más frecuente para mejor UX)
-export const revalidate = 120;
-
+import LogoutButton from './components/LogoutButton';
 
 export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
   // Cargar datos desde el JSON
   const metricsData = await getMetricsData();
   
@@ -51,6 +59,9 @@ export default async function Home() {
 
       {/* Footer with automatic file modification time */}
       <div className="mt-22 text-center">
+        <div className="mb-3">
+          <LogoutButton />
+        </div>
         <span className="text-[11px] font-normal text-gray-500">
           Última actualización: {fileModifiedTime}
         </span>
