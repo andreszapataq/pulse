@@ -72,22 +72,21 @@ export default function LoginForm({ initialError }: LoginFormProps) {
       initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={cardTransition}
-      className="border border-black/20 p-6"
     >
-      <div className="mb-5">
-        <h1 className="text-base font-semibold">
-          {isSignUpMode ? 'Crear cuenta' : 'Iniciar sesion'}
-        </h1>
+      <div className="mb-6">
+        <h2 className="text-base font-medium leading-tight">
+          {isSignUpMode ? 'Crear cuenta' : 'Iniciar sesión'}
+        </h2>
         <p className="text-xs text-gray-500 mt-1">
           {isSignUpMode
             ? 'Registra un usuario para acceder al panel.'
-            : 'Usa tu correo y contrasena para entrar al panel.'}
+            : 'Correo y contraseña para entrar al panel.'}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="email" className="text-xs block mb-1">
+          <label htmlFor="email" className="text-xs block mb-1.5">
             Correo
           </label>
           <input
@@ -98,14 +97,14 @@ export default function LoginForm({ initialError }: LoginFormProps) {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="w-full border border-black/20 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
+            className="w-full border-b border-black/20 px-0 py-2 text-sm bg-transparent focus:outline-none focus:border-black transition-colors"
             placeholder="tu@correo.com"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="text-xs block mb-1">
-            Contrasena
+          <label htmlFor="password" className="text-xs block mb-1.5">
+            Contraseña
           </label>
           <input
             id="password"
@@ -116,8 +115,8 @@ export default function LoginForm({ initialError }: LoginFormProps) {
             minLength={6}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full border border-black/20 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
-            placeholder="********"
+            className="w-full border-b border-black/20 px-0 py-2 text-sm bg-transparent focus:outline-none focus:border-black transition-colors"
+            placeholder="········"
           />
         </div>
 
@@ -135,7 +134,7 @@ export default function LoginForm({ initialError }: LoginFormProps) {
           whileHover={shouldReduceMotion ? undefined : { y: -1 }}
           whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="w-full bg-black text-white py-2 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-black text-white py-2.5 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Procesando...' : isSignUpMode ? 'Crear cuenta' : 'Entrar'}
         </motion.button>
@@ -148,9 +147,9 @@ export default function LoginForm({ initialError }: LoginFormProps) {
           setMessage('');
           setIsSignUpMode((value) => !value);
         }}
-        className="mt-4 text-xs underline underline-offset-2 text-gray-500 cursor-pointer"
+        className="mt-5 w-full text-center text-xs underline underline-offset-2 text-gray-500 cursor-pointer"
       >
-        {isSignUpMode ? 'Ya tienes cuenta? Inicia sesion' : 'No tienes cuenta? Crear cuenta'}
+        {isSignUpMode ? '¿Ya tienes cuenta? Iniciar sesión' : '¿No tienes cuenta? Crear cuenta'}
       </button>
     </motion.div>
   );

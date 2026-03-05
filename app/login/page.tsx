@@ -20,10 +20,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
-      <div className="mb-12">
-        <img src="/logo.svg" alt="Pulse Logo" className="h-4 w-auto ml-px mb-px" />
-        <h2 className="text-sm font-semibold mt-2">Pulse</h2>
-        <p className="text-xs text-gray-500 mt-1">Acceso seguro al tablero de indicadores.</p>
+      <div className="mb-[50px]">
+        <div>
+          <img src="/logo.svg" alt="Pulse Logo" className="h-4 w-auto ml-px mb-px" />
+        </div>
+        <h1 className="text-sm font-semibold">Pulse</h1>
       </div>
 
       <LoginForm initialError={params.error} />
