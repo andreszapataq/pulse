@@ -38,7 +38,12 @@ export default function LoginForm({ initialError }: LoginFormProps) {
     const supabase = createClient();
 
     if (isSignUpMode) {
-      const { error: signUpError } = await supabase.auth.signUp({ email, password });
+      const emailRedirectTo = `${window.location.origin}/auth/callback?next=/`;
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo },
+      });
 
       if (signUpError) {
         setError(signUpError.message);
