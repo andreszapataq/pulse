@@ -20,6 +20,33 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Integracion con Alegra
+
+Pulse puede seguir leyendo `data/metrics.json`, pero si configuras credenciales de Alegra reemplaza automaticamente estas metricas:
+
+- `ventas`: total facturado del mes en curso y top 3 clientes del periodo
+- `inventario`: valor total del inventario y top 3 items por valor en stock
+
+### Variables de entorno
+
+Crea tu `.env.local` a partir de `.env.example` y completa:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+
+ALEGRA_AUTH_MODE=basic
+ALEGRA_EMAIL=tu-correo@empresa.com
+ALEGRA_API_TOKEN=tu-token
+ALEGRA_BASE_URL=https://api.alegra.com/api/v1
+```
+
+Notas:
+
+- La documentacion de `GET /invoices` y `GET /items` muestra autenticacion `Basic`.
+- Si tu cuenta de Alegra usa bearer token, cambia `ALEGRA_AUTH_MODE=bearer`.
+- Si no configuras `ALEGRA_API_TOKEN`, la app mantiene el comportamiento actual y usa solo `data/metrics.json`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -1,5 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import { getAlegraMetricsSnapshot, hasAlegraCredentials } from './alegra';
+import { getCustomerDiscountRules } from './customer-discounts';
 
 /**
  * Tipos para las métricas
@@ -37,7 +39,7 @@ export interface MetricsData {
  * Lee los datos de métricas desde el archivo JSON
  * Incluye automáticamente la fecha de modificación del archivo
  */
-export async function getMetricsData(): Promise<MetricsData> {
+async function getMetricsDataFromFile(): Promise<MetricsData> {
   try {
     const filePath = path.join(process.cwd(), 'data', 'metrics.json');
     
@@ -109,6 +111,53 @@ export async function getMetricsData(): Promise<MetricsData> {
     defaultData.fileLastModified = new Date().toISOString();
     
     return defaultData;
+  }
+}
+
+function mergeAlegraMetrics(
+  baseData: MetricsData,
+  alegraData: NonNullable<Awaited<ReturnType<typeof getAlegraMetricsSnapshot>>>
+): MetricsData {
+  return {
+    ...baseData,
+    lastUpdated: alegraData.lastUpdated,
+    fileLastModified: alegraData.lastUpdated,
+    metrics: {
+      ...baseData.metrics,
+      ventas: {
+        ...baseData.metrics.ventas,
+        value: alegraData.ventas.value,
+        breakdown: alegraData.ventas.breakdown,
+      },
+      inventario: {
+        ...baseData.metrics.inventario,
+        value: alegraData.inventario.value,
+        breakdown: alegraData.inventario.breakdown,
+      },
+    },
+  };
+}
+
+export async function getMetricsData(): Promise<MetricsData> {
+  const baseData = await getMetricsDataFromFile();
+
+  if (!hasAlegraCredentials()) {
+    return baseData;
+  }
+
+  try {
+    const customerDiscountRules = await getCustomerDiscountRules();
+    const alegraData = await getAlegraMetricsSnapshot(customerDiscountRules);
+
+    if (!alegraData) {
+      return baseData;
+    }
+
+    console.log('✅ Métricas de Alegra sincronizadas');
+    return mergeAlegraMetrics(baseData, alegraData);
+  } catch (error) {
+    console.error('⚠️ No fue posible sincronizar Alegra, se usarán datos locales:', error);
+    return baseData;
   }
 }
 
