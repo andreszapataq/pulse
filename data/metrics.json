@@ -18,7 +18,7 @@
     "inventario": {
       "title": "Inventario",
       "value": 0,
-      "target": 100000000,
+      "target": 26000000,
       "showProgressBar": true,
       "breakdown": []
     },
@@ -32,7 +32,7 @@
     "caja": {
       "title": "Caja",
       "value": 8674,
-      "target": 100000000,
+      "target": 36000000,
       "showProgressBar": true
     }
   }
