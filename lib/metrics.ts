@@ -129,6 +129,11 @@ function mergeAlegraMetrics(
         value: alegraData.ventas.value,
         breakdown: alegraData.ventas.breakdown,
       },
+      recaudo: {
+        ...baseData.metrics.recaudo,
+        value: alegraData.recaudo.value,
+        breakdown: alegraData.recaudo.breakdown,
+      },
       inventario: {
         ...baseData.metrics.inventario,
         value: alegraData.inventario.value,

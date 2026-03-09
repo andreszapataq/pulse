@@ -24,6 +24,37 @@ interface AlegraItem {
   };
 }
 
+interface AlegraBankAccount {
+  id?: string | number;
+  name?: string;
+  type?: string;
+  status?: string;
+}
+
+interface AlegraPaymentCategory {
+  name?: string;
+  behavior?: string;
+  total?: number | string;
+}
+
+interface AlegraPayment {
+  id?: string | number;
+  date?: string;
+  amount?: number | string;
+  type?: string;
+  bankAccount?: {
+    id?: string | number;
+    name?: string;
+    type?: string;
+  };
+  client?: {
+    id?: string | number;
+    identification?: string;
+    name?: string;
+  };
+  categories?: AlegraPaymentCategory[];
+}
+
 interface SalesBreakdownItem {
   name: string;
   value: number;
@@ -34,11 +65,21 @@ interface InventoryBreakdownItem {
   value: number;
 }
 
+interface RecaudoBreakdownItem {
+  name: string;
+  value: number;
+  date: string;
+}
+
 export interface AlegraMetricsSnapshot {
   lastUpdated: string;
   ventas: {
     value: number;
     breakdown: SalesBreakdownItem[];
+  };
+  recaudo: {
+    value: number;
+    breakdown: RecaudoBreakdownItem[];
   };
   inventario: {
     value: number;
@@ -56,7 +97,13 @@ interface AlegraConfig {
 const DEFAULT_BASE_URL = 'https://api.alegra.com/api/v1';
 const DEFAULT_PAGE_SIZE = 30;
 const MAX_PAGES = 10;
+const PAYMENTS_MAX_PAGES = 20;
 const ALEGRA_TIMEZONE = 'America/Bogota';
+const RECAUDO_BEHAVIORS = new Set([
+  'ADVANCE_IN',
+  'RECEIVABLE_ACCOUNTS',
+  'SALES',
+]);
 
 interface CustomerDiscountLookup {
   byAlegraContactId: Map<string, number>;
@@ -280,11 +327,12 @@ async function fetchAlegraPage<T>(
 async function fetchAlegraCollection<T>(
   config: AlegraConfig,
   resourcePath: string,
-  extraParams: Record<string, string> = {}
+  extraParams: Record<string, string> = {},
+  maxPages = MAX_PAGES
 ): Promise<T[]> {
   const allItems: T[] = [];
 
-  for (let page = 0; page < MAX_PAGES; page += 1) {
+  for (let page = 0; page < maxPages; page += 1) {
     const pageItems = await fetchAlegraPage<T>(config, resourcePath, {
       start: String(page * DEFAULT_PAGE_SIZE),
       limit: String(DEFAULT_PAGE_SIZE),
@@ -351,6 +399,79 @@ async function fetchMonthlyInvoices(
   return monthlyInvoices;
 }
 
+function normalizeText(value: string | undefined): string {
+  return value?.trim().toLowerCase() ?? '';
+}
+
+function getRecaudoBankAccountIds(accounts: AlegraBankAccount[]): Set<string> {
+  const activeAccounts = accounts.filter(
+    (account) => normalizeText(account.status) !== 'inactive'
+  );
+
+  const exactMatchIds = activeAccounts
+    .filter((account) => normalizeText(account.name) === 'bancos')
+    .map((account) => account.id?.toString())
+    .filter((id): id is string => Boolean(id));
+
+  if (exactMatchIds.length > 0) {
+    return new Set(exactMatchIds);
+  }
+
+  return new Set(
+    activeAccounts
+      .filter((account) => normalizeText(account.type) === 'bank')
+      .map((account) => account.id?.toString())
+      .filter((id): id is string => Boolean(id))
+  );
+}
+
+function isCustomerRecaudoPayment(
+  payment: AlegraPayment,
+  bankAccountIds: Set<string>,
+  startDate: string,
+  endDate: string
+): boolean {
+  if (normalizeText(payment.type) !== 'in') {
+    return false;
+  }
+
+  if (!isDateWithinRange(payment.date, startDate, endDate)) {
+    return false;
+  }
+
+  const bankAccountId = payment.bankAccount?.id?.toString();
+
+  if (!bankAccountId || !bankAccountIds.has(bankAccountId)) {
+    return false;
+  }
+
+  if (!payment.client?.name?.trim()) {
+    return false;
+  }
+
+  return (payment.categories ?? []).some((category) =>
+    RECAUDO_BEHAVIORS.has(category.behavior?.trim().toUpperCase() ?? '')
+  );
+}
+
+function buildRecaudoBreakdown(payments: AlegraPayment[]): RecaudoBreakdownItem[] {
+  return payments
+    .filter((payment) => Boolean(payment.date))
+    .map((payment) => ({
+      name: payment.client?.name?.trim() || 'Cliente sin nombre',
+      value: parseNumber(payment.amount),
+      date: payment.date as string,
+    }))
+    .sort((a, b) => {
+      if (a.date === b.date) {
+        return b.value - a.value;
+      }
+
+      return b.date.localeCompare(a.date);
+    })
+    .slice(0, 3);
+}
+
 function buildSalesBreakdown(
   invoices: AlegraInvoice[],
   discountLookup: CustomerDiscountLookup
@@ -405,13 +526,30 @@ export async function getAlegraMetricsSnapshot(
 
   const { startDate, endDate } = getMonthToDateRange();
 
-  const [invoices, items] = await Promise.all([
+  const [invoices, items, bankAccounts, payments] = await Promise.all([
     fetchMonthlyInvoices(config, startDate, endDate),
     fetchAlegraCollection<AlegraItem>(config, '/items'),
+    fetchAlegraCollection<AlegraBankAccount>(config, '/bank-accounts'),
+    fetchAlegraCollection<AlegraPayment>(
+      config,
+      '/payments',
+      {},
+      PAYMENTS_MAX_PAGES
+    ),
   ]);
+
+  const recaudoBankAccountIds = getRecaudoBankAccountIds(bankAccounts);
+  const recaudoPayments = payments.filter((payment) =>
+    isCustomerRecaudoPayment(payment, recaudoBankAccountIds, startDate, endDate)
+  );
 
   const ventasValue = invoices.reduce(
     (sum, invoice) => sum + getAdjustedNetSalesAmount(invoice, discountLookup),
+    0
+  );
+
+  const recaudoValue = recaudoPayments.reduce(
+    (sum, payment) => sum + parseNumber(payment.amount),
     0
   );
 
@@ -426,6 +564,10 @@ export async function getAlegraMetricsSnapshot(
     ventas: {
       value: ventasValue,
       breakdown: buildSalesBreakdown(invoices, discountLookup),
+    },
+    recaudo: {
+      value: recaudoValue,
+      breakdown: buildRecaudoBreakdown(recaudoPayments),
     },
     inventario: {
       value: inventarioValue,

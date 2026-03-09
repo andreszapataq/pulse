@@ -1,80 +1,37 @@
 {
   "companyName": "BioTissue Colombia",
-  "lastUpdated": "2025-11-18T15:50:00-05:00",
   "metrics": {
     "ventas": {
       "title": "Ventas",
-      "value": 21440489,
+      "value": 0,
       "target": 40000000,
       "showProgressBar": true,
-      "breakdown": [
-        {
-          "name": "Medical Supplies",
-          "value": 12543459
-        },
-        {
-          "name": "QNA Medical",
-          "value": 5637536
-        },
-        {
-          "name": "Clínica Pinares",
-          "value": 2974168
-        }
-      ]
+      "breakdown": []
     },
     "recaudo": {
       "title": "Recaudo",
-      "value": 48592359,
-      "target": 180000000,
+      "value": 0,
+      "target": 40000000,
       "showProgressBar": true,
-      "breakdown": [
-        {
-          "name": "CMS Colombia",
-          "value": 856397,
-          "date": "2025-11-18"
-        },
-        {
-          "name": "Sufase",
-          "value": 7700000,
-          "date": "2025-11-15"
-        },
-        {
-          "name": "Dumian Medical",
-          "value": 8080612,
-          "date": "2025-11-05"
-        }
-      ]
+      "breakdown": []
     },
     "inventario": {
       "title": "Inventario",
-      "value":  95937534,
+      "value": 0,
       "target": 100000000,
       "showProgressBar": true,
-      "breakdown": [
-        {
-          "name": "🟡 Putty Dora",
-          "value": 12961444
-        },
-        {
-          "name": "🟡 Chips Dora",
-          "value": 8877749
-        },
-        {
-          "name": "🟡 Bloques Dora",
-          "value": 3689616
-        }
-      ]
+      "breakdown": []
     },
     "margen": {
       "title": "Margen",
-      "value": 21,
+      "value": 22,
       "target": 30,
       "showProgressBar": true,
       "unit": "%"
     },
     "caja": {
       "title": "Caja",
-      "value": 38854161,
+      "value": 8674,
       "target": 100000000,
       "showProgressBar": true
     }

@@ -25,6 +25,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 Pulse puede seguir leyendo `data/metrics.json`, pero si configuras credenciales de Alegra reemplaza automaticamente estas metricas:
 
 - `ventas`: total facturado del mes en curso y top 3 clientes del periodo
+- `recaudo`: pagos del mes en la cuenta `Bancos` que correspondan a entradas de clientes y ultimas 3 entradas del periodo
 - `inventario`: valor total del inventario y top 3 items por valor en stock
 
 ### Variables de entorno
