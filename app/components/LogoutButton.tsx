@@ -21,7 +21,7 @@ export default function LogoutButton() {
       whileHover={{ opacity: 0.7 }}
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 420, damping: 25 }}
-      className="text-[11px] text-gray-500 underline underline-offset-2 cursor-pointer"
+      className="text-[11px] text-gray-500 cursor-pointer"
     >
       Cerrar sesion
     </motion.button>
