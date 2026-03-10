@@ -1,7 +1,6 @@
-import { promises as fs } from 'fs';
-import path from 'path';
 import { getAlegraMetricsSnapshot, hasAlegraCredentials } from './alegra';
 import { getCustomerDiscountRules } from './customer-discounts';
+import { createClient } from './supabase/server';
 
 /**
  * Tipos para las métricas
@@ -23,7 +22,7 @@ export interface Metric {
 
 export interface MetricsData {
   companyName: string;
-  lastUpdated?: string; // Fecha manual en el JSON
+  lastUpdated?: string;
   metrics: {
     ventas: Metric;
     recaudo: Metric;
@@ -31,88 +30,175 @@ export interface MetricsData {
     margen: Metric;
     caja: Metric;
   };
-  // Campo automático agregado dinámicamente
   fileLastModified?: string;
 }
 
-/**
- * Lee los datos de métricas desde el archivo JSON
- * Incluye automáticamente la fecha de modificación del archivo
- */
-async function getMetricsDataFromFile(): Promise<MetricsData> {
-  try {
-    const filePath = path.join(process.cwd(), 'data', 'metrics.json');
-    
-    // Obtener información del archivo (incluyendo fecha de modificación)
-    const fileStats = await fs.stat(filePath);
-    const fileContents = await fs.readFile(filePath, 'utf8');
-    const data: MetricsData = JSON.parse(fileContents);
-    
-    // Estrategia de fechas simplificada:
-    // 1. Si existe lastUpdated en el JSON, usarla (recomendado)
-    // 2. Como respaldo, usar fecha del archivo
-    
-    if (data.lastUpdated) {
-      // Prioridad 1: Usar fecha manual del JSON (recomendado)
-      data.fileLastModified = data.lastUpdated;
-      console.log('✅ Usando fecha manual del JSON');
-      console.log(`📅 Fecha de actualización: ${formatFileDate(data.fileLastModified)}`);
-    } else {
-      // Prioridad 2: Usar fecha del archivo como respaldo
-      data.fileLastModified = fileStats.mtime.toISOString();
-      console.log('✅ Usando fecha del archivo');
-      console.log(`📅 Archivo modificado: ${formatFileDate(data.fileLastModified)}`);
+type MetricKey = keyof MetricsData['metrics'];
+
+interface SettingRow {
+  key: string;
+  value: string;
+  updated_at: string | null;
+}
+
+interface MetricRow {
+  key: MetricKey;
+  title: string;
+  value: number | string;
+  target: number | string;
+  unit: string | null;
+  show_progress_bar: boolean;
+  updated_at: string | null;
+}
+
+function parseNumber(value: number | string | null | undefined): number {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : 0;
+  }
+
+  return 0;
+}
+
+function createDefaultMetricsData(): MetricsData {
+  return {
+    companyName: 'BioTissue Colombia',
+    metrics: {
+      ventas: {
+        title: 'Ventas',
+        value: 0,
+        target: 46000000,
+        showProgressBar: true,
+        breakdown: [],
+      },
+      recaudo: {
+        title: 'Recaudo',
+        value: 0,
+        target: 46000000,
+        showProgressBar: true,
+        breakdown: [],
+      },
+      inventario: {
+        title: 'Inventario',
+        value: 0,
+        target: 26000000,
+        showProgressBar: true,
+        breakdown: [],
+      },
+      margen: {
+        title: 'Margen',
+        value: 25,
+        target: 30,
+        showProgressBar: true,
+        unit: '%',
+        breakdown: [],
+      },
+      caja: {
+        title: 'Caja',
+        value: 8674,
+        target: 36000000,
+        showProgressBar: true,
+        breakdown: [],
+      },
+    },
+  };
+}
+
+function getLatestUpdatedAt(
+  timestamps: Array<string | null | undefined>
+): string | undefined {
+  let latestDate: Date | null = null;
+
+  for (const timestamp of timestamps) {
+    if (!timestamp) {
+      continue;
     }
-    
-    console.log('✅ Datos de métricas cargados exitosamente');
+
+    const parsed = new Date(timestamp);
+
+    if (Number.isNaN(parsed.getTime())) {
+      continue;
+    }
+
+    if (!latestDate || parsed > latestDate) {
+      latestDate = parsed;
+    }
+  }
+
+  return latestDate?.toISOString();
+}
+
+async function getMetricsDataFromSupabase(): Promise<MetricsData> {
+  const fallbackData = createDefaultMetricsData();
+
+  try {
+    const supabase = await createClient();
+    const [settingsResponse, metricsResponse] = await Promise.all([
+      supabase.from('settings').select('key, value, updated_at'),
+      supabase
+        .from('metrics')
+        .select('key, title, value, target, unit, show_progress_bar, updated_at')
+        .order('sort_order', { ascending: true }),
+    ]);
+
+    if (settingsResponse.error) {
+      console.error(
+        '⚠️ No fue posible cargar settings desde Supabase:',
+        settingsResponse.error
+      );
+      return fallbackData;
+    }
+
+    if (metricsResponse.error) {
+      console.error(
+        '⚠️ No fue posible cargar metrics desde Supabase:',
+        metricsResponse.error
+      );
+      return fallbackData;
+    }
+
+    const data = createDefaultMetricsData();
+    const settings = (settingsResponse.data ?? []) as SettingRow[];
+    const metrics = (metricsResponse.data ?? []) as MetricRow[];
+
+    const companyName = settings.find((setting) => setting.key === 'company_name')?.value;
+
+    if (companyName?.trim()) {
+      data.companyName = companyName.trim();
+    }
+
+    for (const metric of metrics) {
+      const currentMetric = data.metrics[metric.key];
+
+      data.metrics[metric.key] = {
+        ...currentMetric,
+        title: metric.title?.trim() || currentMetric.title,
+        value: parseNumber(metric.value),
+        target: parseNumber(metric.target),
+        showProgressBar: metric.show_progress_bar,
+        unit: metric.unit ?? undefined,
+        breakdown: [],
+      };
+    }
+
+    const latestUpdatedAt = getLatestUpdatedAt([
+      ...settings.map((setting) => setting.updated_at),
+      ...metrics.map((metric) => metric.updated_at),
+    ]);
+
+    data.lastUpdated = latestUpdatedAt;
+    data.fileLastModified = latestUpdatedAt ?? new Date().toISOString();
+
+    console.log('✅ Datos de métricas cargados desde Supabase');
     return data;
   } catch (error) {
-    console.error('❌ Error al cargar datos de métricas:', error);
-    
-    // Datos por defecto en caso de error
-    const defaultData: MetricsData = {
-      companyName: "BioTissue Colombia",
-      metrics: {
-        ventas: {
-          title: "Ventas",
-          value: 0,
-          target: 0,
-          showProgressBar: true
-        },
-        recaudo: {
-          title: "Recaudo",
-          value: 0,
-          target: 0,
-          showProgressBar: true
-        },
-        inventario: {
-          title: "Inventario",
-          value: 0,
-          target: 0,
-          showProgressBar: true
-        },
-        margen: {
-          title: "Margen",
-          value: 0,
-          target: 0,
-          showProgressBar: true,
-          unit: "%",
-          breakdown: []
-        },
-        caja: {
-          title: "Caja",
-          value: 0,
-          target: 0,
-          showProgressBar: true,
-          breakdown: []
-        }
-      }
-    };
-    
-    // En caso de error, usar fecha actual
-    defaultData.fileLastModified = new Date().toISOString();
-    
-    return defaultData;
+    console.error('❌ Error al cargar datos base desde Supabase:', error);
+    fallbackData.fileLastModified = new Date().toISOString();
+    return fallbackData;
   }
 }
 
@@ -146,7 +232,7 @@ function mergeAlegraMetrics(
 }
 
 export async function getMetricsData(): Promise<MetricsData> {
-  const baseData = await getMetricsDataFromFile();
+  const baseData = await getMetricsDataFromSupabase();
 
   if (!hasAlegraCredentials()) {
     return baseData;

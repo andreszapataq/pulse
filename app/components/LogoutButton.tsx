@@ -23,7 +23,7 @@ export default function LogoutButton() {
       transition={{ type: 'spring', stiffness: 420, damping: 25 }}
       className="text-[11px] text-gray-500 cursor-pointer"
     >
-      Cerrar sesion
+      Cerrar sesión
     </motion.button>
   );
 }

@@ -20,9 +20,14 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Integracion con Alegra
+## Integracion con Alegra y Supabase
 
-Pulse puede seguir leyendo `data/metrics.json`, pero si configuras credenciales de Alegra reemplaza automaticamente estas metricas:
+Pulse carga su configuracion base desde Supabase:
+
+- `settings`: configuracion general como `company_name`
+- `metrics`: configuracion y valores base de cada metrica
+
+Si configuras credenciales de Alegra, Pulse reemplaza automaticamente estas metricas:
 
 - `ventas`: total facturado del mes en curso y top 3 clientes del periodo
 - `recaudo`: pagos del mes en la cuenta `Bancos` que correspondan a entradas de clientes y ultimas 3 entradas del periodo
@@ -46,7 +51,7 @@ Notas:
 
 - La documentacion de `GET /invoices` y `GET /items` muestra autenticacion `Basic`.
 - Si tu cuenta de Alegra usa bearer token, cambia `ALEGRA_AUTH_MODE=bearer`.
-- Si no configuras `ALEGRA_API_TOKEN`, la app mantiene el comportamiento actual y usa solo `data/metrics.json`.
+- Si no configuras `ALEGRA_API_TOKEN`, la app usa solo los datos almacenados en Supabase.
 
 ## Learn More
 
