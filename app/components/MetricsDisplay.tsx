@@ -33,53 +33,6 @@ function formatPercentageDisplay(percentage: number): string {
   return `${percentage}%`;
 }
 
-// Nueva función para obtener el ancho de la barra (máximo 100%)
-function getProgressBarWidth(percentage: number): string {
-  return `${Math.min(percentage, 100)}%`;
-}
-
-interface MetricCardProps {
-  title: string;
-  value: string;
-  percentage?: string;
-  showProgressBar?: boolean;
-}
-
-function MetricCard({ title, value, percentage, showProgressBar = false }: MetricCardProps) {
-  const getProgressWidth = () => {
-    if (!percentage) return '0%';
-    // Extraer el número del porcentaje y limitar a 100%
-    const percentageNumber = parseInt(percentage.replace('%', ''));
-    return getProgressBarWidth(percentageNumber);
-  };
-
-  return (
-    <div className="mb-10">
-      <h2 className="text-base font-medium leading-tight">
-        {title}
-      </h2>
-      <div className="flex justify-between items-baseline mb-[3px]">
-        <div className="text-xl font-normal">
-          {value}
-        </div>
-        {percentage && (
-          <span className="text-sm font-normal text-gray-500">
-            {percentage}
-          </span>
-        )}
-      </div>
-      {showProgressBar && (
-        <div className="w-full h-[10px]">
-          <div 
-            className="bg-linear-to-r from-background to-foreground h-full" 
-            style={{ width: getProgressWidth() }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
 interface MetricsDisplayProps {
   metricsData: MetricsData;
 }
@@ -99,6 +52,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
         percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.ventas.value, metricsData.metrics.ventas.target))}
         showProgressBar={metricsData.metrics.ventas.showProgressBar}
         breakdown={metricsData.metrics.ventas.breakdown}
+        unit={metricsData.metrics.ventas.unit}
         listStyle="numbers"
         isExpanded={expandedAccordion === 'ventas'}
         onToggle={() => handleAccordionToggle('ventas')}
@@ -111,6 +65,7 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
         percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.recaudo.value, metricsData.metrics.recaudo.target))}
         showProgressBar={metricsData.metrics.recaudo.showProgressBar}
         breakdown={metricsData.metrics.recaudo.breakdown}
+        unit={metricsData.metrics.recaudo.unit}
         listStyle="bullets"
         isExpanded={expandedAccordion === 'recaudo'}
         onToggle={() => handleAccordionToggle('recaudo')}
@@ -123,24 +78,37 @@ export default function MetricsDisplay({ metricsData }: MetricsDisplayProps) {
         percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.inventario.value, metricsData.metrics.inventario.target))}
         showProgressBar={metricsData.metrics.inventario.showProgressBar}
         breakdown={metricsData.metrics.inventario.breakdown}
+        unit={metricsData.metrics.inventario.unit}
         listStyle="numbers"
         isExpanded={expandedAccordion === 'inventario'}
         onToggle={() => handleAccordionToggle('inventario')}
         target={metricsData.metrics.inventario.target}
       />
       
-      <MetricCard
+      <AccordionMetricCard
         title={metricsData.metrics.margen.title}
         value={formatValue(metricsData.metrics.margen.value, metricsData.metrics.margen.unit)}
         percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.margen.value, metricsData.metrics.margen.target))}
         showProgressBar={metricsData.metrics.margen.showProgressBar}
+        breakdown={metricsData.metrics.margen.breakdown}
+        unit={metricsData.metrics.margen.unit}
+        listStyle="numbers"
+        isExpanded={expandedAccordion === 'margen'}
+        onToggle={() => handleAccordionToggle('margen')}
+        target={metricsData.metrics.margen.target}
       />
       
-      <MetricCard
+      <AccordionMetricCard
         title={metricsData.metrics.caja.title}
         value={formatValue(metricsData.metrics.caja.value, metricsData.metrics.caja.unit)}
         percentage={formatPercentageDisplay(calculatePercentage(metricsData.metrics.caja.value, metricsData.metrics.caja.target))}
         showProgressBar={metricsData.metrics.caja.showProgressBar}
+        breakdown={metricsData.metrics.caja.breakdown}
+        unit={metricsData.metrics.caja.unit}
+        listStyle="numbers"
+        isExpanded={expandedAccordion === 'caja'}
+        onToggle={() => handleAccordionToggle('caja')}
+        target={metricsData.metrics.caja.target}
       />
     </div>
   );

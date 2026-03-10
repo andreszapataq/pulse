@@ -27,13 +27,15 @@
       "value": 25,
       "target": 30,
       "showProgressBar": true,
-      "unit": "%"
+      "unit": "%",
+      "breakdown": []
     },
     "caja": {
       "title": "Caja",
       "value": 8674,
       "target": 36000000,
-      "showProgressBar": true
+      "showProgressBar": true,
+      "breakdown": []
     }
   }
 }

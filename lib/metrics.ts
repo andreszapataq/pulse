@@ -96,13 +96,15 @@ async function getMetricsDataFromFile(): Promise<MetricsData> {
           value: 0,
           target: 0,
           showProgressBar: true,
-          unit: "%"
+          unit: "%",
+          breakdown: []
         },
         caja: {
           title: "Caja",
           value: 0,
           target: 0,
-          showProgressBar: true
+          showProgressBar: true,
+          breakdown: []
         }
       }
     };

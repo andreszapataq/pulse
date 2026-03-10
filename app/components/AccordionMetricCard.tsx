@@ -9,13 +9,21 @@ interface BreakdownItem {
   date?: string;
 }
 
-// Función local para formatear moneda (evita imports problemáticos)
+// Funciones locales para formatear valores (evitan imports problemáticos)
 function formatCurrency(value: number): string {
   const numberFormatted = new Intl.NumberFormat('es-CO', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
   return `$${numberFormatted}`;
+}
+
+function formatValue(value: number, unit?: string): string {
+  if (unit === '%') {
+    return `${value}%`;
+  }
+
+  return formatCurrency(value);
 }
 
 // Función para formatear fecha sin año (ej: "9 sep.")
@@ -40,6 +48,7 @@ interface AccordionMetricCardProps {
   percentage?: string;
   showProgressBar?: boolean;
   breakdown?: BreakdownItem[];
+  unit?: string;
   listStyle?: 'numbers' | 'bullets';
   isExpanded?: boolean;
   onToggle?: () => void;
@@ -52,6 +61,7 @@ export default function AccordionMetricCard({
   percentage, 
   showProgressBar = false, 
   breakdown,
+  unit,
   listStyle = 'numbers',
   isExpanded = false,
   onToggle,
@@ -66,13 +76,15 @@ export default function AccordionMetricCard({
     return `${Math.min(percentageNumber, 100)}%`;
   };
 
-  const hasBreakdown = breakdown && breakdown.length > 0;
+  const breakdownItems = breakdown ?? [];
+  const hasBreakdown = breakdownItems.length > 0;
+  const hasDetails = target !== undefined || hasBreakdown;
 
   return (
     <motion.div layout className="mb-10">
       <div 
-        className={`${hasBreakdown ? 'cursor-pointer' : ''}`}
-        onClick={() => hasBreakdown && onToggle && onToggle()}
+        className={`${hasDetails ? 'cursor-pointer' : ''}`}
+        onClick={() => hasDetails && onToggle && onToggle()}
       >
         <h2 className="text-base font-medium leading-tight">
           {title}
@@ -97,12 +109,12 @@ export default function AccordionMetricCard({
         )}
       </div>
 
-      {/* Breakdown section */}
-      {hasBreakdown && (
+      {/* Details section */}
+      {hasDetails && (
         <AnimatePresence initial={false}>
           {isExpanded && (
             <motion.div
-              key="breakdown"
+              key="details"
               initial={shouldReduceMotion ? false : { height: 0, opacity: 0, y: -4 }}
               animate={shouldReduceMotion ? { height: 'auto', opacity: 1, y: 0 } : { height: 'auto', opacity: 1, y: 0 }}
               exit={shouldReduceMotion ? { height: 0, opacity: 0 } : { height: 0, opacity: 0, y: -4 }}
@@ -114,19 +126,22 @@ export default function AccordionMetricCard({
               className="overflow-hidden"
             >
               <div className="mt-4 text-xs">
-                <div className="mb-2 text-sm">
-                  🏁 {target ? formatCurrency(target) : formatCurrency(breakdown.reduce((sum, item) => sum + item.value, 0))}
-                </div>
-                {breakdown.map((item, index) => (
-                  <div key={index} className="flex justify-between py-1">
-                    <span className="text-gray-700">
-                      {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
-                    </span>
-                    <span className="font-medium">
-                      {formatCurrency(item.value)}
-                    </span>
+                {target !== undefined && (
+                  <div className="mb-2 text-sm">
+                    🏁 Meta: {formatValue(target, unit)}
                   </div>
-                ))}
+                )}
+                {hasBreakdown &&
+                  breakdownItems.map((item, index) => (
+                    <div key={index} className="flex justify-between py-1">
+                      <span className="text-gray-700">
+                        {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
+                      </span>
+                      <span className="font-medium">
+                        {formatValue(item.value, unit)}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </motion.div>
           )}
