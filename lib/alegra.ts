@@ -38,6 +38,10 @@ interface AlegraPaymentCategory {
   total?: number | string;
 }
 
+interface AlegraPaymentInvoice {
+  id?: string | number;
+}
+
 interface AlegraPayment {
   id?: string | number;
   date?: string;
@@ -53,6 +57,7 @@ interface AlegraPayment {
     identification?: string;
     name?: string;
   };
+  invoices?: AlegraPaymentInvoice[];
   categories?: AlegraPaymentCategory[];
 }
 
@@ -98,12 +103,11 @@ interface AlegraConfig {
 const DEFAULT_BASE_URL = 'https://api.alegra.com/api/v1';
 const DEFAULT_PAGE_SIZE = 30;
 const MAX_PAGES = 10;
-const PAYMENTS_MAX_PAGES = 20;
+const PAYMENTS_PAGE_SEARCH_LIMIT = 512;
 const ALEGRA_TIMEZONE = 'America/Bogota';
 const RECAUDO_BEHAVIORS = new Set([
   'ADVANCE_IN',
   'RECEIVABLE_ACCOUNTS',
-  'SALES',
 ]);
 
 interface CustomerDiscountLookup {
@@ -400,6 +404,141 @@ async function fetchMonthlyInvoices(
   return monthlyInvoices;
 }
 
+function getDateBounds(items: Array<{ date?: string }>): {
+  earliestDate: string | null;
+  latestDate: string | null;
+} {
+  return items.reduce(
+    (bounds, item) => {
+      if (!item.date) {
+        return bounds;
+      }
+
+      if (!bounds.earliestDate || item.date < bounds.earliestDate) {
+        bounds.earliestDate = item.date;
+      }
+
+      if (!bounds.latestDate || item.date > bounds.latestDate) {
+        bounds.latestDate = item.date;
+      }
+
+      return bounds;
+    },
+    {
+      earliestDate: null,
+      latestDate: null,
+    } as {
+      earliestDate: string | null;
+      latestDate: string | null;
+    }
+  );
+}
+
+async function fetchPaymentsPage(
+  config: AlegraConfig,
+  pageIndex: number,
+  pageCache: Map<number, AlegraPayment[]>
+): Promise<AlegraPayment[]> {
+  const cachedPage = pageCache.get(pageIndex);
+
+  if (cachedPage) {
+    return cachedPage;
+  }
+
+  const pageItems = await fetchAlegraPage<AlegraPayment>(config, '/payments', {
+    start: String(pageIndex * DEFAULT_PAGE_SIZE),
+    limit: String(DEFAULT_PAGE_SIZE),
+  });
+
+  pageCache.set(pageIndex, pageItems);
+  return pageItems;
+}
+
+async function findLastPaymentsPageIndex(config: AlegraConfig): Promise<number> {
+  const pageCache = new Map<number, AlegraPayment[]>();
+  const firstPage = await fetchPaymentsPage(config, 0, pageCache);
+
+  if (firstPage.length === 0) {
+    return -1;
+  }
+
+  let lowerBound = 0;
+  let upperBound = 1;
+
+  while (upperBound < PAYMENTS_PAGE_SEARCH_LIMIT) {
+    const pageItems = await fetchPaymentsPage(config, upperBound, pageCache);
+
+    if (pageItems.length === 0) {
+      break;
+    }
+
+    lowerBound = upperBound;
+    upperBound *= 2;
+  }
+
+  let left = lowerBound;
+  let right = Math.min(upperBound, PAYMENTS_PAGE_SEARCH_LIMIT);
+
+  while (left + 1 < right) {
+    const middle = Math.floor((left + right) / 2);
+    const pageItems = await fetchPaymentsPage(config, middle, pageCache);
+
+    if (pageItems.length === 0) {
+      right = middle;
+    } else {
+      left = middle;
+    }
+  }
+
+  if (right === PAYMENTS_PAGE_SEARCH_LIMIT) {
+    const lastCheckedPage = PAYMENTS_PAGE_SEARCH_LIMIT - 1;
+    const pageItems = await fetchPaymentsPage(config, lastCheckedPage, pageCache);
+    return pageItems.length === 0 ? left : lastCheckedPage;
+  }
+
+  return left;
+}
+
+async function fetchMonthlyPayments(
+  config: AlegraConfig,
+  startDate: string,
+  endDate: string
+): Promise<AlegraPayment[]> {
+  const monthlyPayments: AlegraPayment[] = [];
+  const pageCache = new Map<number, AlegraPayment[]>();
+  const lastPageIndex = await findLastPaymentsPageIndex(config);
+
+  if (lastPageIndex < 0) {
+    return monthlyPayments;
+  }
+
+  for (let pageIndex = lastPageIndex; pageIndex >= 0; pageIndex -= 1) {
+    const currentPage = await fetchPaymentsPage(config, pageIndex, pageCache);
+
+    if (currentPage.length === 0) {
+      continue;
+    }
+
+    const { earliestDate, latestDate } = getDateBounds(currentPage);
+
+    if (earliestDate && earliestDate > endDate) {
+      continue;
+    }
+
+    if (latestDate && latestDate < startDate) {
+      break;
+    }
+
+    monthlyPayments.push(
+      ...currentPage.filter((payment) =>
+        isDateWithinRange(payment.date, startDate, endDate)
+      )
+    );
+  }
+
+  return monthlyPayments;
+}
+
 function normalizeText(value: string | undefined): string {
   return value?.trim().toLowerCase() ?? '';
 }
@@ -428,15 +567,9 @@ function getRecaudoBankAccountIds(accounts: AlegraBankAccount[]): Set<string> {
 
 function isCustomerRecaudoPayment(
   payment: AlegraPayment,
-  bankAccountIds: Set<string>,
-  startDate: string,
-  endDate: string
+  bankAccountIds: Set<string>
 ): boolean {
   if (normalizeText(payment.type) !== 'in') {
-    return false;
-  }
-
-  if (!isDateWithinRange(payment.date, startDate, endDate)) {
     return false;
   }
 
@@ -448,6 +581,10 @@ function isCustomerRecaudoPayment(
 
   if (!payment.client?.name?.trim()) {
     return false;
+  }
+
+  if (Array.isArray(payment.invoices) && payment.invoices.length > 0) {
+    return true;
   }
 
   return (payment.categories ?? []).some((category) =>
@@ -542,17 +679,12 @@ export async function getAlegraMetricsSnapshot(
       fields: 'averageCost',
     }),
     fetchAlegraCollection<AlegraBankAccount>(config, '/bank-accounts'),
-    fetchAlegraCollection<AlegraPayment>(
-      config,
-      '/payments',
-      {},
-      PAYMENTS_MAX_PAGES
-    ),
+    fetchMonthlyPayments(config, startDate, endDate),
   ]);
 
   const recaudoBankAccountIds = getRecaudoBankAccountIds(bankAccounts);
   const recaudoPayments = payments.filter((payment) =>
-    isCustomerRecaudoPayment(payment, recaudoBankAccountIds, startDate, endDate)
+    isCustomerRecaudoPayment(payment, recaudoBankAccountIds)
   );
 
   const ventasValue = invoices.reduce(
