@@ -20,6 +20,7 @@ interface AlegraItem {
   name?: string;
   inventory?: {
     availableQuantity?: number | string;
+    averageCost?: number | string;
     unitCost?: number | string;
   };
 }
@@ -493,15 +494,24 @@ function buildSalesBreakdown(
     .slice(0, 3);
 }
 
+function getItemInventoryCost(item: AlegraItem): number {
+  const averageCost = parseNumber(item.inventory?.averageCost);
+
+  if (averageCost > 0) {
+    return averageCost;
+  }
+
+  return parseNumber(item.inventory?.unitCost);
+}
+
 function buildInventoryBreakdown(items: AlegraItem[]): InventoryBreakdownItem[] {
   return items
     .map((item) => {
       const availableQuantity = parseNumber(item.inventory?.availableQuantity);
-      const unitCost = parseNumber(item.inventory?.unitCost);
 
       return {
         name: item.name?.trim() || 'Ítem sin nombre',
-        value: availableQuantity * unitCost,
+        value: availableQuantity * getItemInventoryCost(item),
       };
     })
     .filter((item) => item.value > 0)
@@ -528,7 +538,9 @@ export async function getAlegraMetricsSnapshot(
 
   const [invoices, items, bankAccounts, payments] = await Promise.all([
     fetchMonthlyInvoices(config, startDate, endDate),
-    fetchAlegraCollection<AlegraItem>(config, '/items'),
+    fetchAlegraCollection<AlegraItem>(config, '/items', {
+      fields: 'averageCost',
+    }),
     fetchAlegraCollection<AlegraBankAccount>(config, '/bank-accounts'),
     fetchAlegraCollection<AlegraPayment>(
       config,
@@ -555,8 +567,7 @@ export async function getAlegraMetricsSnapshot(
 
   const inventarioValue = items.reduce((sum, item) => {
     const availableQuantity = parseNumber(item.inventory?.availableQuantity);
-    const unitCost = parseNumber(item.inventory?.unitCost);
-    return sum + availableQuantity * unitCost;
+    return sum + availableQuantity * getItemInventoryCost(item);
   }, 0);
 
   return {

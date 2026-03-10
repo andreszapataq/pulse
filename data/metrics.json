@@ -4,14 +4,14 @@
     "ventas": {
       "title": "Ventas",
       "value": 0,
-      "target": 40000000,
+      "target": 46000000,
       "showProgressBar": true,
       "breakdown": []
     },
     "recaudo": {
       "title": "Recaudo",
       "value": 0,
-      "target": 40000000,
+      "target": 46000000,
       "showProgressBar": true,
       "breakdown": []
     },
@@ -24,7 +24,7 @@
     },
     "margen": {
       "title": "Margen",
-      "value": 22,
+      "value": 25,
       "target": 30,
       "showProgressBar": true,
       "unit": "%"
