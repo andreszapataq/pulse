@@ -1,61 +1,124 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRefreshState } from './RefreshProvider';
 
 interface AutoRefreshProps {
   intervalMinutes?: number;
+  lastSyncedAt?: string;
 }
 
-export default function AutoRefresh({ intervalMinutes = 5 }: AutoRefreshProps) {
+function parseTimestamp(value?: string): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+export default function AutoRefresh({
+  intervalMinutes = 5,
+  lastSyncedAt,
+}: AutoRefreshProps) {
   const router = useRouter();
+  const [isSyncing, setIsSyncing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { setIsRefreshing } = useRefreshState();
   const intervalMs = intervalMinutes * 60 * 1000;
-  const lastRefreshCompletedAtRef = useRef(Date.now());
+  const lastSyncedAtMs = parseTimestamp(lastSyncedAt);
+  const lastRefreshCompletedAtRef = useRef(lastSyncedAtMs ?? Date.now());
   const refreshInFlightRef = useRef(false);
-  const hadPendingRefreshRef = useRef(false);
+  const awaitingRouteRefreshRef = useRef(false);
+  const routeRefreshStartedRef = useRef(false);
 
   useEffect(() => {
-    setIsRefreshing(isPending);
+    if (lastSyncedAtMs !== null) {
+      lastRefreshCompletedAtRef.current = lastSyncedAtMs;
+    }
+  }, [lastSyncedAtMs]);
 
-    if (isPending) {
-      hadPendingRefreshRef.current = true;
+  useEffect(() => {
+    setIsRefreshing(isSyncing || isPending);
+
+    if (isPending && awaitingRouteRefreshRef.current) {
+      routeRefreshStartedRef.current = true;
       return;
     }
 
-    if (hadPendingRefreshRef.current) {
-      lastRefreshCompletedAtRef.current = Date.now();
+    if (
+      !isPending &&
+      awaitingRouteRefreshRef.current &&
+      routeRefreshStartedRef.current
+    ) {
+      if (lastSyncedAtMs !== null) {
+        lastRefreshCompletedAtRef.current = lastSyncedAtMs;
+      } else {
+        lastRefreshCompletedAtRef.current = Date.now();
+      }
       refreshInFlightRef.current = false;
-      hadPendingRefreshRef.current = false;
+      awaitingRouteRefreshRef.current = false;
+      routeRefreshStartedRef.current = false;
+      setIsSyncing(false);
     }
-  }, [isPending, setIsRefreshing]);
+  }, [isPending, isSyncing, lastSyncedAtMs, setIsRefreshing]);
+
+  const syncMetrics = useCallback(async () => {
+    const response = await fetch('/api/metrics/sync', {
+      method: 'POST',
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('No fue posible sincronizar las métricas.');
+    }
+
+    const payload = (await response.json()) as { lastSyncedAt?: string | null };
+    const syncedAtMs = parseTimestamp(payload.lastSyncedAt ?? undefined);
+
+    if (syncedAtMs !== null) {
+      lastRefreshCompletedAtRef.current = syncedAtMs;
+    }
+  }, []);
 
   const triggerRefresh = useCallback(
-    (reason: string, force = false) => {
+    async (reason: string) => {
       if (refreshInFlightRef.current) {
         return;
       }
 
       const msSinceLastRefresh = Date.now() - lastRefreshCompletedAtRef.current;
-      if (!force && msSinceLastRefresh < intervalMs) {
+      if (msSinceLastRefresh < intervalMs) {
         return;
       }
 
       refreshInFlightRef.current = true;
       console.log(reason);
-      startTransition(() => {
-        router.refresh();
-      });
+      setIsSyncing(true);
+
+      try {
+        await syncMetrics();
+        awaitingRouteRefreshRef.current = true;
+        routeRefreshStartedRef.current = false;
+        startTransition(() => {
+          router.refresh();
+        });
+      } catch (error) {
+        console.error('⚠️ No fue posible refrescar las métricas:', error);
+        refreshInFlightRef.current = false;
+        awaitingRouteRefreshRef.current = false;
+        routeRefreshStartedRef.current = false;
+        setIsSyncing(false);
+      }
     },
-    [intervalMs, router, startTransition]
+    [intervalMs, router, startTransition, syncMetrics]
   );
 
   useEffect(() => {
     // Auto-refresh cada X minutos
     const interval = setInterval(() => {
-      triggerRefresh('🔄 Auto-refresh activado', true);
+      void triggerRefresh('🔄 Auto-refresh activado');
     }, intervalMs);
 
     return () => clearInterval(interval);
@@ -65,12 +128,12 @@ export default function AutoRefresh({ intervalMinutes = 5 }: AutoRefreshProps) {
     // Solo refrescar al volver a foco si los datos ya cumplieron el umbral.
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        triggerRefresh('🔄 App visible - refrescando datos');
+        void triggerRefresh('🔄 App visible - refrescando datos');
       }
     };
 
     const handleFocus = () => {
-      triggerRefresh('🔄 App enfocada - refrescando datos');
+      void triggerRefresh('🔄 App enfocada - refrescando datos');
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);

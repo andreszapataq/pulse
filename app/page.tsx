@@ -30,16 +30,17 @@ export default async function Home() {
   // Asegurar que el mes termine con punto
   const currentDate = currentDateFormatted.replace(/([a-z]+)( \d{4})/, '$1.$2');
 
-  // Usar la fecha de modificación del archivo (automática)
-  const fileModifiedTime = metricsData.fileLastModified 
-    ? formatFileDate(metricsData.fileLastModified)
+  // Mostrar la última sincronización efectiva de los datos.
+  const lastSyncedAt = metricsData.fileLastModified;
+  const lastSynchronizedLabel = lastSyncedAt
+    ? formatFileDate(lastSyncedAt)
     : 'Fecha no disponible';
 
   return (
     <RefreshProvider>
       <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
         {/* Auto-refresh component - alineado con el cache de Alegra */}
-        <AutoRefresh intervalMinutes={5} />
+        <AutoRefresh intervalMinutes={5} lastSyncedAt={lastSyncedAt} />
         
         {/* Header */}
         <div className="mb-[50px]">
@@ -65,7 +66,7 @@ export default async function Home() {
           <div className="mb-3">
             <LogoutButton />
           </div>
-          <RefreshStatus lastUpdated={fileModifiedTime} />
+          <RefreshStatus lastSynchronizedAt={lastSynchronizedLabel} />
         </div>
       </main>
     </RefreshProvider>
