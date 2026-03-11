@@ -69,6 +69,8 @@ interface SalesBreakdownItem {
 interface InventoryBreakdownItem {
   name: string;
   value: number;
+  quantity: number;
+  unitCost: number;
 }
 
 interface RecaudoBreakdownItem {
@@ -645,10 +647,13 @@ function buildInventoryBreakdown(items: AlegraItem[]): InventoryBreakdownItem[] 
   return items
     .map((item) => {
       const availableQuantity = parseNumber(item.inventory?.availableQuantity);
+      const unitCost = getItemInventoryCost(item);
 
       return {
         name: item.name?.trim() || 'Ítem sin nombre',
-        value: availableQuantity * getItemInventoryCost(item),
+        value: availableQuantity * unitCost,
+        quantity: availableQuantity,
+        unitCost,
       };
     })
     .filter((item) => item.value > 0)

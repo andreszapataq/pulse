@@ -1,12 +1,15 @@
 'use client';
 
 // Estado controlado desde el componente padre
+import { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 interface BreakdownItem {
   name: string;
   value: number;
   date?: string;
+  quantity?: number;
+  unitCost?: number;
 }
 
 // Funciones locales para formatear valores (evitan imports problemáticos)
@@ -24,6 +27,13 @@ function formatValue(value: number, unit?: string): string {
   }
 
   return formatCurrency(value);
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
 // Función para formatear fecha sin año (ej: "9 sep.")
@@ -68,6 +78,7 @@ export default function AccordionMetricCard({
   target
 }: AccordionMetricCardProps) {
   const shouldReduceMotion = useReducedMotion();
+  const [revealedQuantities, setRevealedQuantities] = useState<Record<number, boolean>>({});
 
   const getProgressWidth = () => {
     if (!percentage) return '0%';
@@ -79,6 +90,13 @@ export default function AccordionMetricCard({
   const breakdownItems = breakdown ?? [];
   const hasBreakdown = breakdownItems.length > 0;
   const hasDetails = target !== undefined || hasBreakdown;
+
+  const handleBreakdownToggle = (index: number) => {
+    setRevealedQuantities((currentState) => ({
+      ...currentState,
+      [index]: !currentState[index],
+    }));
+  };
 
   return (
     <motion.div layout className="mb-10">
@@ -133,13 +151,43 @@ export default function AccordionMetricCard({
                 )}
                 {hasBreakdown &&
                   breakdownItems.map((item, index) => (
-                    <div key={index} className="flex justify-between py-1">
-                      <span className="text-gray-700">
-                        {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
-                      </span>
-                      <span className="font-medium">
-                        {formatValue(item.value, unit)}
-                      </span>
+                    <div key={index} className="py-1">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-700">
+                          {listStyle === 'bullets' ? '•' : `${index + 1}.`} {item.date ? `${formatDateShort(item.date)} ` : ''}{item.name}:
+                        </span>
+                        {item.quantity !== undefined ? (
+                          <button
+                            type="button"
+                            onClick={() => handleBreakdownToggle(index)}
+                            className="min-w-[92px] font-medium cursor-pointer text-right underline decoration-gray-300 underline-offset-3"
+                            aria-pressed={Boolean(revealedQuantities[index])}
+                          >
+                            <AnimatePresence mode="wait" initial={false}>
+                              <motion.span
+                                key={revealedQuantities[index] ? 'quantity' : 'value'}
+                                initial={shouldReduceMotion ? false : { opacity: 0, y: 3 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -3 }}
+                                transition={
+                                  shouldReduceMotion
+                                    ? { duration: 0.01 }
+                                    : { duration: 0.18, ease: 'easeOut' }
+                                }
+                                className="inline-block"
+                              >
+                                {revealedQuantities[index]
+                                  ? `${formatNumber(item.quantity)} und.`
+                                  : formatValue(item.value, unit)}
+                              </motion.span>
+                            </AnimatePresence>
+                          </button>
+                        ) : (
+                          <span className="font-medium">
+                            {formatValue(item.value, unit)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
               </div>

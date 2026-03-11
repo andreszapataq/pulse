@@ -9,6 +9,8 @@ export interface BreakdownItem {
   name: string;
   value: number;
   date?: string;
+  quantity?: number;
+  unitCost?: number;
 }
 
 export interface Metric {
