@@ -1,7 +1,7 @@
 'use client';
 
 // Estado controlado desde el componente padre
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 interface BreakdownItem {
@@ -79,6 +79,12 @@ export default function AccordionMetricCard({
 }: AccordionMetricCardProps) {
   const shouldReduceMotion = useReducedMotion();
   const [revealedQuantities, setRevealedQuantities] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    if (!isExpanded) {
+      setRevealedQuantities({});
+    }
+  }, [isExpanded]);
 
   const getProgressWidth = () => {
     if (!percentage) return '0%';
