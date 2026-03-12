@@ -177,13 +177,17 @@ export default function AccordionMetricCard({
                             <AnimatePresence mode="wait" initial={false}>
                               <motion.span
                                 key={revealedQuantities[index] ? 'quantity' : 'value'}
-                                initial={shouldReduceMotion ? false : { opacity: 0, y: 3 }}
+                                initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -3 }}
+                                exit={
+                                  shouldReduceMotion
+                                    ? { opacity: 0 }
+                                    : { opacity: 0, y: -4, transition: { duration: 0.06 } }
+                                }
                                 transition={
                                   shouldReduceMotion
                                     ? { duration: 0.01 }
-                                    : { duration: 0.18, ease: 'easeOut' }
+                                    : { type: 'spring', stiffness: 700, damping: 30 }
                                 }
                                 className="inline-block"
                               >
