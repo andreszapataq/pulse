@@ -10,6 +10,7 @@ interface BreakdownItem {
   date?: string;
   quantity?: number;
   unitCost?: number;
+  unit?: string;
 }
 
 // Funciones locales para formatear valores (evitan imports problemáticos)
@@ -23,7 +24,11 @@ function formatCurrency(value: number): string {
 
 function formatValue(value: number, unit?: string): string {
   if (unit === '%') {
-    return `${value}%`;
+    const formatted = new Intl.NumberFormat('es-CO', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(value);
+    return `${formatted}%`;
   }
 
   return formatCurrency(value);
@@ -184,13 +189,13 @@ export default function AccordionMetricCard({
                               >
                                 {revealedQuantities[index]
                                   ? `${formatNumber(item.quantity)} und.`
-                                  : formatValue(item.value, unit)}
+                                  : formatValue(item.value, item.unit ?? unit)}
                               </motion.span>
                             </AnimatePresence>
                           </button>
                         ) : (
                           <span className="font-medium">
-                            {formatValue(item.value, unit)}
+                            {formatValue(item.value, item.unit ?? unit)}
                           </span>
                         )}
                       </div>

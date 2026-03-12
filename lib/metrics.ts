@@ -11,6 +11,7 @@ export interface BreakdownItem {
   date?: string;
   quantity?: number;
   unitCost?: number;
+  unit?: string;
 }
 
 export interface Metric {
@@ -228,6 +229,11 @@ function mergeAlegraMetrics(
         ...baseData.metrics.inventario,
         value: alegraData.inventario.value,
         breakdown: alegraData.inventario.breakdown,
+      },
+      margen: {
+        ...baseData.metrics.margen,
+        value: alegraData.margen.value,
+        breakdown: alegraData.margen.breakdown,
       },
     },
   };

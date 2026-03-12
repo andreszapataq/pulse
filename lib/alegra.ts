@@ -8,11 +8,28 @@ interface AlegraInvoice {
   total?: number | string;
   tax?: number | string;
   subtotal?: number | string;
+  items?: AlegraInvoiceLine[];
   client?: {
     id?: string | number;
     identification?: string;
     name?: string;
   };
+}
+
+interface AlegraInvoiceLine {
+  id?: string | number;
+  quantity?: number | string;
+  price?: number | string;
+  total?: number | string;
+  discount?: number | string;
+  item?: {
+    id?: string | number;
+    name?: string;
+  };
+  name?: string;
+  tax?: Array<{
+    amount?: number | string;
+  }>;
 }
 
 interface AlegraItem {
@@ -79,6 +96,12 @@ interface RecaudoBreakdownItem {
   date: string;
 }
 
+interface MarginBreakdownItem {
+  name: string;
+  value: number;
+  unit?: string;
+}
+
 export interface AlegraMetricsSnapshot {
   lastUpdated: string;
   ventas: {
@@ -92,6 +115,10 @@ export interface AlegraMetricsSnapshot {
   inventario: {
     value: number;
     breakdown: InventoryBreakdownItem[];
+  };
+  margen: {
+    value: number;
+    breakdown: MarginBreakdownItem[];
   };
 }
 
@@ -198,17 +225,7 @@ function applyDiscount(amount: number, discountPercent: number): number {
     return amount;
   }
 
-  return Math.round(amount * (1 - discountPercent / 100));
-}
-
-function getAdjustedNetSalesAmount(
-  invoice: AlegraInvoice,
-  lookup: CustomerDiscountLookup
-): number {
-  const netSalesAmount = getNetSalesAmount(invoice);
-  const discountPercent = getCustomerDiscountPercent(invoice, lookup);
-
-  return applyDiscount(netSalesAmount, discountPercent);
+  return amount * (1 - discountPercent / 100);
 }
 
 function getDatePartsInBogota(date = new Date()) {
@@ -331,6 +348,35 @@ async function fetchAlegraPage<T>(
   return normalizeCollectionResponse<T>(payload);
 }
 
+async function fetchAlegraResource<T>(
+  config: AlegraConfig,
+  resourcePath: string,
+  params: Record<string, string> = {}
+): Promise<T> {
+  const searchParams = new URLSearchParams(params);
+  const queryString = searchParams.toString();
+  const url = queryString
+    ? `${config.baseUrl}${resourcePath}?${queryString}`
+    : `${config.baseUrl}${resourcePath}`;
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: buildAuthorizationHeader(config),
+    },
+    next: { revalidate: 300 },
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(
+      `Alegra respondió ${response.status} al consultar ${resourcePath}: ${message}`
+    );
+  }
+
+  return (await response.json()) as T;
+}
+
 async function fetchAlegraCollection<T>(
   config: AlegraConfig,
   resourcePath: string,
@@ -404,6 +450,46 @@ async function fetchMonthlyInvoices(
   }
 
   return monthlyInvoices;
+}
+
+async function fetchInvoiceDetail(
+  config: AlegraConfig,
+  invoiceId: string
+): Promise<AlegraInvoice | null> {
+  try {
+    return await fetchAlegraResource<AlegraInvoice>(config, `/invoices/${invoiceId}`);
+  } catch (error) {
+    console.error(`⚠️ No fue posible consultar el detalle de la factura ${invoiceId}:`, error);
+    return null;
+  }
+}
+
+async function hydrateInvoicesWithDetails(
+  config: AlegraConfig,
+  invoices: AlegraInvoice[]
+): Promise<AlegraInvoice[]> {
+  const detailedInvoices: AlegraInvoice[] = [];
+  const batchSize = 10;
+
+  for (let index = 0; index < invoices.length; index += batchSize) {
+    const batch = invoices.slice(index, index + batchSize);
+    const detailedBatch = await Promise.all(
+      batch.map(async (invoice) => {
+        const invoiceId = invoice.id?.toString();
+
+        if (!invoiceId) {
+          return invoice;
+        }
+
+        const detail = await fetchInvoiceDetail(config, invoiceId);
+        return detail ?? invoice;
+      })
+    );
+
+    detailedInvoices.push(...detailedBatch);
+  }
+
+  return detailedInvoices;
 }
 
 function getDateBounds(items: Array<{ date?: string }>): {
@@ -623,7 +709,7 @@ function buildSalesBreakdown(
     const currentTotal = totalsByClient.get(clientName) ?? 0;
     totalsByClient.set(
       clientName,
-      currentTotal + getAdjustedNetSalesAmount(invoice, discountLookup)
+      currentTotal + getAdjustedInvoiceNetSalesAmount(invoice, discountLookup)
     );
   }
 
@@ -641,6 +727,57 @@ function getItemInventoryCost(item: AlegraItem): number {
   }
 
   return parseNumber(item.inventory?.unitCost);
+}
+
+function getInvoiceLineTaxAmount(line: AlegraInvoiceLine): number {
+  return (line.tax ?? []).reduce((sum, tax) => sum + parseNumber(tax.amount), 0);
+}
+
+function getInvoiceLineDiscountAmount(line: AlegraInvoiceLine, grossAmount: number): number {
+  const discount = parseNumber(line.discount);
+
+  if (discount <= 0) {
+    return 0;
+  }
+
+  if (discount <= 100) {
+    return grossAmount * (discount / 100);
+  }
+
+  return Math.min(discount, grossAmount);
+}
+
+function getInvoiceLineNetSalesAmount(line: AlegraInvoiceLine): number {
+  const lineTotal = parseNumber(line.total);
+  const lineTax = getInvoiceLineTaxAmount(line);
+
+  if (lineTotal > 0) {
+    return lineTotal - lineTax;
+  }
+
+  const grossAmount = parseNumber(line.price) * parseNumber(line.quantity);
+  return Math.max(grossAmount - getInvoiceLineDiscountAmount(line, grossAmount), 0);
+}
+
+function getInvoiceNetSalesAmount(invoice: AlegraInvoice): number {
+  if (Array.isArray(invoice.items) && invoice.items.length > 0) {
+    return invoice.items.reduce(
+      (sum, line) => sum + getInvoiceLineNetSalesAmount(line),
+      0
+    );
+  }
+
+  return getNetSalesAmount(invoice);
+}
+
+function getAdjustedInvoiceNetSalesAmount(
+  invoice: AlegraInvoice,
+  discountLookup: CustomerDiscountLookup
+): number {
+  const netSalesAmount = getInvoiceNetSalesAmount(invoice);
+  const discountPercent = getCustomerDiscountPercent(invoice, discountLookup);
+
+  return applyDiscount(netSalesAmount, discountPercent);
 }
 
 function buildInventoryBreakdown(items: AlegraItem[]): InventoryBreakdownItem[] {
@@ -661,6 +798,70 @@ function buildInventoryBreakdown(items: AlegraItem[]): InventoryBreakdownItem[] 
     .slice(0, 3);
 }
 
+function buildItemCostLookup(items: AlegraItem[]): Map<string, number> {
+  const costByItemId = new Map<string, number>();
+
+  for (const item of items) {
+    const itemId = item.id?.toString();
+
+    if (!itemId) {
+      continue;
+    }
+
+    costByItemId.set(itemId, getItemInventoryCost(item));
+  }
+
+  return costByItemId;
+}
+
+function getInvoiceLineItemId(line: AlegraInvoiceLine): string | null {
+  const rawId = line.item?.id ?? line.id;
+
+  if (rawId === undefined || rawId === null) {
+    return null;
+  }
+
+  return rawId.toString();
+}
+
+function calculateCostOfGoodsSold(
+  invoices: AlegraInvoice[],
+  costByItemId: Map<string, number>
+): number {
+  return invoices.reduce((invoiceSum, invoice) => {
+    const invoiceCost = (invoice.items ?? []).reduce((lineSum, line) => {
+      const itemId = getInvoiceLineItemId(line);
+      const quantity = parseNumber(line.quantity);
+
+      if (!itemId || quantity <= 0) {
+        return lineSum;
+      }
+
+      const unitCost = costByItemId.get(itemId) ?? 0;
+      return lineSum + quantity * unitCost;
+    }, 0);
+
+    return invoiceSum + invoiceCost;
+  }, 0);
+}
+
+function roundPercentage(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function buildMarginBreakdown(
+  ventasValue: number,
+  costoVentasValue: number
+): MarginBreakdownItem[] {
+  const utilidadBruta = ventasValue - costoVentasValue;
+
+  return [
+    { name: 'Ventas netas', value: ventasValue, unit: '$' },
+    { name: 'Costo material vendido', value: costoVentasValue, unit: '$' },
+    { name: 'Utilidad bruta', value: utilidadBruta, unit: '$' },
+  ];
+}
+
 export function hasAlegraCredentials(): boolean {
   return Boolean(process.env.ALEGRA_API_TOKEN?.trim());
 }
@@ -675,7 +876,6 @@ export async function getAlegraMetricsSnapshot(
   }
 
   const discountLookup = buildCustomerDiscountLookup(customerDiscountRules);
-
   const { startDate, endDate } = getMonthToDateRange();
 
   const [invoices, items, bankAccounts, payments] = await Promise.all([
@@ -692,8 +892,10 @@ export async function getAlegraMetricsSnapshot(
     isCustomerRecaudoPayment(payment, recaudoBankAccountIds)
   );
 
-  const ventasValue = invoices.reduce(
-    (sum, invoice) => sum + getAdjustedNetSalesAmount(invoice, discountLookup),
+  const detailedInvoices = await hydrateInvoicesWithDetails(config, invoices);
+
+  const ventasValue = detailedInvoices.reduce(
+    (sum, invoice) => sum + getAdjustedInvoiceNetSalesAmount(invoice, discountLookup),
     0
   );
 
@@ -707,11 +909,17 @@ export async function getAlegraMetricsSnapshot(
     return sum + availableQuantity * getItemInventoryCost(item);
   }, 0);
 
+  const costByItemId = buildItemCostLookup(items);
+  const costoVentasValue = calculateCostOfGoodsSold(detailedInvoices, costByItemId);
+  const utilidadBrutaValue = ventasValue - costoVentasValue;
+  const margenValue =
+    ventasValue > 0 ? roundPercentage((utilidadBrutaValue / ventasValue) * 100) : 0;
+
   return {
     lastUpdated: new Date().toISOString(),
     ventas: {
       value: ventasValue,
-      breakdown: buildSalesBreakdown(invoices, discountLookup),
+      breakdown: buildSalesBreakdown(detailedInvoices, discountLookup),
     },
     recaudo: {
       value: recaudoValue,
@@ -720,6 +928,10 @@ export async function getAlegraMetricsSnapshot(
     inventario: {
       value: inventarioValue,
       breakdown: buildInventoryBreakdown(items),
+    },
+    margen: {
+      value: margenValue,
+      breakdown: buildMarginBreakdown(ventasValue, costoVentasValue),
     },
   };
 }

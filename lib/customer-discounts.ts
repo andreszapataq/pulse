@@ -20,7 +20,7 @@ export async function getCustomerDiscountRules(): Promise<CustomerDiscountRule[]
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('customer_discounts')
+      .from('discounts')
       .select(
         'alegra_contact_id, client_identification, client_name, discount_percent, active'
       )
