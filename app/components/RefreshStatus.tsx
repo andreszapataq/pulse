@@ -3,12 +3,10 @@
 import { useRefreshState } from './RefreshProvider';
 
 interface RefreshStatusProps {
-  lastSynchronizedAt: string;
+  lastUpdated: string;
 }
 
-export default function RefreshStatus({
-  lastSynchronizedAt,
-}: RefreshStatusProps) {
+export default function RefreshStatus({ lastUpdated }: RefreshStatusProps) {
   const { isRefreshing } = useRefreshState();
 
   return (
@@ -22,7 +20,7 @@ export default function RefreshStatus({
           Actualizando...
         </>
       ) : (
-        <>Última sincronización: {lastSynchronizedAt}</>
+        <>Última actualización: {lastUpdated}</>
       )}
     </span>
   );

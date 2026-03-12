@@ -107,8 +107,6 @@ const DEFAULT_PAGE_SIZE = 30;
 const MAX_PAGES = 10;
 const PAYMENTS_PAGE_SEARCH_LIMIT = 512;
 const ALEGRA_TIMEZONE = 'America/Bogota';
-const ALEGRA_CACHE_WINDOW_SECONDS = 300;
-const ALEGRA_CACHE_WINDOW_MS = ALEGRA_CACHE_WINDOW_SECONDS * 1000;
 const RECAUDO_BEHAVIORS = new Set([
   'ADVANCE_IN',
   'RECEIVABLE_ACCOUNTS',
@@ -118,14 +116,6 @@ interface CustomerDiscountLookup {
   byAlegraContactId: Map<string, number>;
   byIdentification: Map<string, number>;
 }
-
-interface CachedSnapshotEntry {
-  snapshot: AlegraMetricsSnapshot | null;
-  expiresAt: number;
-}
-
-const alegraSnapshotCache = new Map<string, CachedSnapshotEntry>();
-const alegraSnapshotPromises = new Map<string, Promise<AlegraMetricsSnapshot | null>>();
 
 function parseNumber(value: number | string | undefined): number {
   if (typeof value === 'number') {
@@ -326,7 +316,7 @@ async function fetchAlegraPage<T>(
         Accept: 'application/json',
         Authorization: buildAuthorizationHeader(config),
       },
-      cache: 'no-store',
+      next: { revalidate: 300 },
     }
   );
 
@@ -675,53 +665,7 @@ export function hasAlegraCredentials(): boolean {
   return Boolean(process.env.ALEGRA_API_TOKEN?.trim());
 }
 
-function getSnapshotCacheKey(rules: CustomerDiscountRule[]): string {
-  return JSON.stringify(
-    rules.map((rule) => ({
-      active: rule.active,
-      alegraContactId: rule.alegraContactId,
-      clientIdentification: rule.clientIdentification ?? null,
-      discountPercent: rule.discountPercent,
-    }))
-  );
-}
-
-async function loadAlegraMetricsSnapshot(
-  customerDiscountRules: CustomerDiscountRule[] = [],
-  options: {
-    forceRefresh?: boolean;
-  } = {}
-): Promise<AlegraMetricsSnapshot | null> {
-  const cacheKey = getSnapshotCacheKey(customerDiscountRules);
-  const now = Date.now();
-  const cachedEntry = alegraSnapshotCache.get(cacheKey);
-
-  if (!options.forceRefresh && cachedEntry && cachedEntry.expiresAt > now) {
-    return cachedEntry.snapshot;
-  }
-
-  const inFlightPromise = alegraSnapshotPromises.get(cacheKey);
-  if (inFlightPromise) {
-    return inFlightPromise;
-  }
-
-  const refreshPromise = buildAlegraMetricsSnapshot(customerDiscountRules)
-    .then((snapshot) => {
-      alegraSnapshotCache.set(cacheKey, {
-        snapshot,
-        expiresAt: Date.now() + ALEGRA_CACHE_WINDOW_MS,
-      });
-      return snapshot;
-    })
-    .finally(() => {
-      alegraSnapshotPromises.delete(cacheKey);
-    });
-
-  alegraSnapshotPromises.set(cacheKey, refreshPromise);
-  return refreshPromise;
-}
-
-async function buildAlegraMetricsSnapshot(
+export async function getAlegraMetricsSnapshot(
   customerDiscountRules: CustomerDiscountRule[] = []
 ): Promise<AlegraMetricsSnapshot | null> {
   const config = getAlegraConfig();
@@ -778,16 +722,4 @@ async function buildAlegraMetricsSnapshot(
       breakdown: buildInventoryBreakdown(items),
     },
   };
-}
-
-export async function getAlegraMetricsSnapshot(
-  customerDiscountRules: CustomerDiscountRule[] = []
-): Promise<AlegraMetricsSnapshot | null> {
-  return loadAlegraMetricsSnapshot(customerDiscountRules);
-}
-
-export async function refreshAlegraMetricsSnapshot(
-  customerDiscountRules: CustomerDiscountRule[] = []
-): Promise<AlegraMetricsSnapshot | null> {
-  return loadAlegraMetricsSnapshot(customerDiscountRules, { forceRefresh: true });
 }
