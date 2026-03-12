@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useRefreshState } from './RefreshProvider';
 
 interface AutoRefreshProps {
   intervalMinutes?: number;
@@ -10,47 +9,34 @@ interface AutoRefreshProps {
 
 export default function AutoRefresh({ intervalMinutes = 5 }: AutoRefreshProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const { setIsRefreshing } = useRefreshState();
-
-  useEffect(() => {
-    setIsRefreshing(isPending);
-  }, [isPending, setIsRefreshing]);
-
-  const triggerRefresh = useCallback(
-    (reason: string) => {
-      if (isPending) {
-        return;
-      }
-
-      console.log(reason);
-      startTransition(() => {
-        router.refresh();
-      });
-    },
-    [isPending, router]
-  );
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   useEffect(() => {
     // Auto-refresh cada X minutos
     const interval = setInterval(() => {
-      triggerRefresh('🔄 Auto-refresh activado');
+      console.log('🔄 Auto-refresh activado');
+      router.refresh();
+      setLastRefresh(new Date());
     }, intervalMinutes * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [intervalMinutes, triggerRefresh]);
+  }, [router, intervalMinutes]);
 
   useEffect(() => {
     // Refresh cuando la app vuelve al foreground (iOS)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        triggerRefresh('🔄 App visible - refrescando datos');
+        console.log('🔄 App visible - refrescando datos');
+        router.refresh();
+        setLastRefresh(new Date());
       }
     };
 
     // Refresh cuando la ventana vuelve a tener foco
     const handleFocus = () => {
-      triggerRefresh('🔄 App enfocada - refrescando datos');
+      console.log('🔄 App enfocada - refrescando datos');
+      router.refresh();
+      setLastRefresh(new Date());
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -60,7 +46,7 @@ export default function AutoRefresh({ intervalMinutes = 5 }: AutoRefreshProps) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [triggerRefresh]);
+  }, [router]);
 
   return null; // Componente invisible
 }

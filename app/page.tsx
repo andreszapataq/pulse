@@ -1,11 +1,9 @@
 import { getMetricsData, formatFileDate } from '@/lib/metrics';
-import AutoRefresh from '@/app/components/AutoRefresh';
-import MetricsDisplay from '@/app/components/MetricsDisplay';
-import LogoutButton from '@/app/components/LogoutButton';
-import RefreshStatus from '@/app/components/RefreshStatus';
-import { RefreshProvider } from '@/app/components/RefreshProvider';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import AutoRefresh from './components/AutoRefresh';
+import MetricsDisplay from './components/MetricsDisplay';
+import LogoutButton from './components/LogoutButton';
 
 export default async function Home() {
   const supabase = await createClient();
@@ -36,38 +34,38 @@ export default async function Home() {
     : 'Fecha no disponible';
 
   return (
-    <RefreshProvider>
-      <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
-        {/* Auto-refresh component - alineado con el cache de Alegra */}
-        <AutoRefresh intervalMinutes={5} />
+    <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
+      {/* Auto-refresh component - cada 2 minutos para mejor UX */}
+      <AutoRefresh intervalMinutes={2} />
+      
+      {/* Header */}
+      <div className="mb-[50px]">
+        <div>
+          <img src="/logo.svg" alt="Pulse Logo" className="h-4 w-auto ml-px mb-px" />
+        </div>
         
-        {/* Header */}
-        <div className="mb-[50px]">
-          <div>
-            <img src="/logo.svg" alt="Pulse Logo" className="h-4 w-auto ml-px mb-px" />
-          </div>
-          
-          <div className="flex justify-between items-start">
-            <h1 className="text-sm font-semibold">
-              {metricsData.companyName}
-            </h1>
-            <span className="text-xs font-normal">
-              {currentDate}
-            </span>
-          </div>
+        <div className="flex justify-between items-start">
+          <h1 className="text-sm font-semibold">
+            {metricsData.companyName}
+          </h1>
+          <span className="text-xs font-normal">
+            {currentDate}
+          </span>
         </div>
+      </div>
 
-        {/* Metrics */}
-        <MetricsDisplay metricsData={metricsData} />
+      {/* Metrics */}
+      <MetricsDisplay metricsData={metricsData} />
 
-        {/* Footer with automatic file modification time */}
-        <div className="mt-22 text-center">
-          <div className="mb-3">
-            <LogoutButton />
-          </div>
-          <RefreshStatus lastUpdated={fileModifiedTime} />
+      {/* Footer with automatic file modification time */}
+      <div className="mt-22 text-center">
+        <div className="mb-3">
+          <LogoutButton />
         </div>
-      </main>
-    </RefreshProvider>
+        <span className="text-[11px] font-normal text-gray-500">
+          Última actualización: {fileModifiedTime}
+        </span>
+      </div>
+    </main>
   );
 }
