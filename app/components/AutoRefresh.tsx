@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRefreshState } from './RefreshProvider';
 
@@ -23,14 +23,15 @@ export default function AutoRefresh({
   lastSyncedAt,
 }: AutoRefreshProps) {
   const router = useRouter();
-  const [isRefreshingLocal, setIsRefreshingLocal] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const { setIsRefreshing } = useRefreshState();
   const intervalMs = intervalMinutes * 60 * 1000;
   const lastSyncedAtMs = parseTimestamp(lastSyncedAt);
   const lastRefreshCompletedAtRef = useRef(lastSyncedAtMs ?? Date.now());
   const refreshInFlightRef = useRef(false);
-  const expectedSyncedAtRef = useRef<number | null>(null);
-  const finishRefreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const awaitingRouteRefreshRef = useRef(false);
+  const routeRefreshStartedRef = useRef(false);
 
   useEffect(() => {
     if (lastSyncedAtMs !== null) {
@@ -39,42 +40,29 @@ export default function AutoRefresh({
   }, [lastSyncedAtMs]);
 
   useEffect(() => {
-    setIsRefreshing(isRefreshingLocal);
-  }, [isRefreshingLocal, setIsRefreshing]);
+    setIsRefreshing(isSyncing || isPending);
 
-  const finishRefresh = useCallback(() => {
-    if (finishRefreshTimeoutRef.current) {
-      clearTimeout(finishRefreshTimeoutRef.current);
-      finishRefreshTimeoutRef.current = null;
+    if (isPending && awaitingRouteRefreshRef.current) {
+      routeRefreshStartedRef.current = true;
+      return;
     }
 
-    if (lastSyncedAtMs !== null) {
-      lastRefreshCompletedAtRef.current = lastSyncedAtMs;
-    }
-
-    expectedSyncedAtRef.current = null;
-    refreshInFlightRef.current = false;
-    setIsRefreshingLocal(false);
-  }, [lastSyncedAtMs]);
-
-  useEffect(() => {
     if (
-      refreshInFlightRef.current &&
-      expectedSyncedAtRef.current !== null &&
-      lastSyncedAtMs !== null &&
-      lastSyncedAtMs >= expectedSyncedAtRef.current
+      !isPending &&
+      awaitingRouteRefreshRef.current &&
+      routeRefreshStartedRef.current
     ) {
-      finishRefresh();
-    }
-  }, [finishRefresh, lastSyncedAtMs]);
-
-  useEffect(() => {
-    return () => {
-      if (finishRefreshTimeoutRef.current) {
-        clearTimeout(finishRefreshTimeoutRef.current);
+      if (lastSyncedAtMs !== null) {
+        lastRefreshCompletedAtRef.current = lastSyncedAtMs;
+      } else {
+        lastRefreshCompletedAtRef.current = Date.now();
       }
-    };
-  }, []);
+      refreshInFlightRef.current = false;
+      awaitingRouteRefreshRef.current = false;
+      routeRefreshStartedRef.current = false;
+      setIsSyncing(false);
+    }
+  }, [isPending, isSyncing, lastSyncedAtMs, setIsRefreshing]);
 
   const syncMetrics = useCallback(async () => {
     const response = await fetch('/api/metrics/sync', {
@@ -92,7 +80,6 @@ export default function AutoRefresh({
     if (syncedAtMs !== null) {
       lastRefreshCompletedAtRef.current = syncedAtMs;
     }
-    return syncedAtMs;
   }, []);
 
   const triggerRefresh = useCallback(
@@ -108,20 +95,24 @@ export default function AutoRefresh({
 
       refreshInFlightRef.current = true;
       console.log(reason);
-      setIsRefreshingLocal(true);
+      setIsSyncing(true);
 
       try {
-        expectedSyncedAtRef.current = await syncMetrics();
-        router.refresh();
-        finishRefreshTimeoutRef.current = setTimeout(() => {
-          finishRefresh();
-        }, 2000);
+        await syncMetrics();
+        awaitingRouteRefreshRef.current = true;
+        routeRefreshStartedRef.current = false;
+        startTransition(() => {
+          router.refresh();
+        });
       } catch (error) {
         console.error('⚠️ No fue posible refrescar las métricas:', error);
-        finishRefresh();
+        refreshInFlightRef.current = false;
+        awaitingRouteRefreshRef.current = false;
+        routeRefreshStartedRef.current = false;
+        setIsSyncing(false);
       }
     },
-    [finishRefresh, intervalMs, router, syncMetrics]
+    [intervalMs, router, startTransition, syncMetrics]
   );
 
   useEffect(() => {
