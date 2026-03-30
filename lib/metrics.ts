@@ -1,4 +1,4 @@
-import { getAlegraMetricsSnapshot, hasAlegraCredentials } from './alegra';
+import { getAlegraMetricsSnapshot, hasAlegraCredentials, getCurrentMonthStr, getFullMonthRange } from './alegra';
 import { getCustomerDiscountRules } from './customer-discounts';
 import { createClient } from './supabase/server';
 
@@ -239,13 +239,85 @@ function mergeAlegraMetrics(
   };
 }
 
-export async function getMetricsData(): Promise<MetricsData> {
+interface MonthlySnapshotRow {
+  metrics_data: MetricsData['metrics'];
+  updated_at: string;
+}
+
+async function getMonthlySnapshot(month: string): Promise<MonthlySnapshotRow | null> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('monthly_snapshots')
+      .select('metrics_data, updated_at')
+      .eq('month', month)
+      .single();
+
+    if (error || !data) return null;
+    return data as MonthlySnapshotRow;
+  } catch {
+    return null;
+  }
+}
+
+async function saveMonthlySnapshot(month: string, metrics: MetricsData['metrics']): Promise<void> {
+  try {
+    const supabase = await createClient();
+    await supabase
+      .from('monthly_snapshots')
+      .upsert({
+        month,
+        metrics_data: metrics,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'month' });
+  } catch (error) {
+    console.error('⚠️ No fue posible guardar snapshot mensual:', error);
+  }
+}
+
+export async function getMetricsData(month?: string): Promise<MetricsData> {
   const baseData = await getMetricsDataFromSupabase();
+  const currentMonth = getCurrentMonthStr();
+  const isCurrentMonth = !month || month === currentMonth;
 
   if (!hasAlegraCredentials()) {
     return baseData;
   }
 
+  // Mes pasado: intentar cargar snapshot primero
+  if (!isCurrentMonth) {
+    const snapshot = await getMonthlySnapshot(month);
+
+    if (snapshot) {
+      console.log(`✅ Snapshot cargado para ${month}`);
+      return {
+        ...baseData,
+        metrics: snapshot.metrics_data,
+        fileLastModified: snapshot.updated_at,
+      };
+    }
+
+    // No hay snapshot — consultar Alegra para el mes completo
+    try {
+      const customerDiscountRules = await getCustomerDiscountRules();
+      const dateRange = getFullMonthRange(month);
+      const alegraData = await getAlegraMetricsSnapshot(customerDiscountRules, dateRange);
+
+      if (!alegraData) {
+        return baseData;
+      }
+
+      const mergedData = mergeAlegraMetrics(baseData, alegraData);
+      await saveMonthlySnapshot(month, mergedData.metrics);
+      console.log(`✅ Snapshot guardado para ${month}`);
+      return mergedData;
+    } catch (error) {
+      console.error(`⚠️ No fue posible cargar datos de ${month}:`, error);
+      return baseData;
+    }
+  }
+
+  // Mes actual: comportamiento existente (month-to-date)
   try {
     const customerDiscountRules = await getCustomerDiscountRules();
     const alegraData = await getAlegraMetricsSnapshot(customerDiscountRules);

@@ -228,7 +228,7 @@ function applyDiscount(amount: number, discountPercent: number): number {
   return amount * (1 - discountPercent / 100);
 }
 
-function getDatePartsInBogota(date = new Date()) {
+export function getDatePartsInBogota(date = new Date()) {
   const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: ALEGRA_TIMEZONE,
     year: 'numeric',
@@ -250,6 +250,21 @@ function getMonthToDateRange() {
   return {
     startDate: `${year}-${month}-01`,
     endDate: `${year}-${month}-${day}`,
+  };
+}
+
+export function getCurrentMonthStr(): string {
+  const { year, month } = getDatePartsInBogota();
+  return `${year}-${month}`;
+}
+
+export function getFullMonthRange(monthStr: string): { startDate: string; endDate: string } {
+  const [year, month] = monthStr.split('-').map(Number);
+  const lastDay = new Date(year, month, 0).getDate();
+  const mm = String(month).padStart(2, '0');
+  return {
+    startDate: `${year}-${mm}-01`,
+    endDate: `${year}-${mm}-${String(lastDay).padStart(2, '0')}`,
   };
 }
 
@@ -867,7 +882,8 @@ export function hasAlegraCredentials(): boolean {
 }
 
 export async function getAlegraMetricsSnapshot(
-  customerDiscountRules: CustomerDiscountRule[] = []
+  customerDiscountRules: CustomerDiscountRule[] = [],
+  dateRange?: { startDate: string; endDate: string }
 ): Promise<AlegraMetricsSnapshot | null> {
   const config = getAlegraConfig();
 
@@ -876,7 +892,7 @@ export async function getAlegraMetricsSnapshot(
   }
 
   const discountLookup = buildCustomerDiscountLookup(customerDiscountRules);
-  const { startDate, endDate } = getMonthToDateRange();
+  const { startDate, endDate } = dateRange ?? getMonthToDateRange();
 
   const [invoices, items, bankAccounts, payments] = await Promise.all([
     fetchMonthlyInvoices(config, startDate, endDate),
