@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
@@ -31,6 +31,7 @@ function generateMonthOptions(currentMonth: string) {
 
 export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth }: MonthPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
@@ -41,11 +42,13 @@ export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth 
   const handleSelect = useCallback(
     (month: string) => {
       setIsOpen(false);
-      if (month === todayMonth.current) {
-        router.push('/');
-      } else {
-        router.push(`/?month=${month}`);
-      }
+      startTransition(() => {
+        if (month === todayMonth.current) {
+          router.push('/');
+        } else {
+          router.push(`/?month=${month}`);
+        }
+      });
     },
     [router]
   );
@@ -67,19 +70,65 @@ export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth 
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => !isPending && setIsOpen((prev) => !prev)}
         className="text-xs font-normal cursor-pointer flex items-center gap-1"
       >
-        {displayDate}
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        >
-          <path d="M2 4L5 7L8 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <AnimatePresence mode="wait">
+          {isPending ? (
+            <motion.span
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center gap-1.5"
+            >
+              <motion.span
+                className="text-gray-400"
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                {displayDate}
+              </motion.span>
+              <motion.svg
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+              >
+                <path
+                  d="M5 1.5a3.5 3.5 0 1 1-3.5 3.5"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  className="text-gray-400"
+                />
+              </motion.svg>
+            </motion.span>
+          ) : (
+            <motion.span
+              key="date"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center gap-1"
+            >
+              {displayDate}
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+                className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+              >
+                <path d="M2 4L5 7L8 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
 
       <AnimatePresence>
