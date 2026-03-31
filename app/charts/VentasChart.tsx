@@ -38,7 +38,7 @@ export default function VentasChart({ data }: VentasChartProps) {
     <div>
       <h2 className="text-sm font-semibold mb-8">Ventas</h2>
       <ChartContainer config={chartConfig} className="h-[250px] w-full">
-        <AreaChart data={data} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="#e5e5e5" />
           <XAxis
             dataKey="monthLabel"
