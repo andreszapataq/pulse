@@ -21,6 +21,7 @@ export interface Metric {
   showProgressBar: boolean;
   unit?: string;
   breakdown?: BreakdownItem[];
+  categoryBreakdown?: Array<{ category: string; value: number }>;
 }
 
 export interface MetricsData {
@@ -229,6 +230,7 @@ function mergeAlegraMetrics(
         ...baseData.metrics.inventario,
         value: alegraData.inventario.value,
         breakdown: alegraData.inventario.breakdown,
+        categoryBreakdown: alegraData.inventario.categoryBreakdown,
       },
       margen: {
         ...baseData.metrics.margen,

@@ -2,6 +2,16 @@ import { createClient } from './supabase/server';
 import { getCurrentMonthStr } from './alegra';
 import { getMetricsData, type MetricsData } from './metrics';
 
+export interface InventarioRadarDataPoint {
+  category: string;
+  value: number;
+}
+
+export interface InventarioRadarChartData {
+  companyName: string;
+  chartData: InventarioRadarDataPoint[];
+}
+
 export interface ChartDataPoint {
   month: string;
   monthLabel: string;
@@ -59,5 +69,19 @@ export async function getYearlyVentasData(): Promise<VentasChartData> {
   return {
     companyName: liveData.companyName,
     chartData,
+  };
+}
+
+export async function getInventarioRadarData(): Promise<InventarioRadarChartData> {
+  const liveData = await getMetricsData();
+
+  const categoryBreakdown = liveData.metrics.inventario.categoryBreakdown ?? [];
+
+  return {
+    companyName: liveData.companyName,
+    chartData: categoryBreakdown.map((item) => ({
+      category: item.category,
+      value: item.value,
+    })),
   };
 }

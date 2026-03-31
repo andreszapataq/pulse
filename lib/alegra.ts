@@ -40,6 +40,10 @@ interface AlegraItem {
     averageCost?: number | string;
     unitCost?: number | string;
   };
+  itemCategory?: {
+    id?: string | number;
+    name?: string;
+  };
 }
 
 interface AlegraBankAccount {
@@ -90,6 +94,11 @@ interface InventoryBreakdownItem {
   unitCost: number;
 }
 
+interface InventoryCategoryItem {
+  category: string;
+  value: number;
+}
+
 interface RecaudoBreakdownItem {
   name: string;
   value: number;
@@ -115,6 +124,7 @@ export interface AlegraMetricsSnapshot {
   inventario: {
     value: number;
     breakdown: InventoryBreakdownItem[];
+    categoryBreakdown: InventoryCategoryItem[];
   };
   margen: {
     value: number;
@@ -813,6 +823,25 @@ function buildInventoryBreakdown(items: AlegraItem[]): InventoryBreakdownItem[] 
     .slice(0, 3);
 }
 
+function buildInventoryByCategory(items: AlegraItem[]): InventoryCategoryItem[] {
+  const categoryMap = new Map<string, number>();
+
+  for (const item of items) {
+    const availableQuantity = parseNumber(item.inventory?.availableQuantity);
+    const cost = getItemInventoryCost(item);
+    const itemValue = availableQuantity * cost;
+
+    if (itemValue <= 0) continue;
+
+    const categoryName = item.itemCategory?.name?.trim() || 'Sin categoría';
+    categoryMap.set(categoryName, (categoryMap.get(categoryName) ?? 0) + itemValue);
+  }
+
+  return Array.from(categoryMap.entries())
+    .map(([category, value]) => ({ category, value }))
+    .sort((a, b) => b.value - a.value);
+}
+
 function buildItemCostLookup(items: AlegraItem[]): Map<string, number> {
   const costByItemId = new Map<string, number>();
 
@@ -897,7 +926,7 @@ export async function getAlegraMetricsSnapshot(
   const [invoices, items, bankAccounts, payments] = await Promise.all([
     fetchMonthlyInvoices(config, startDate, endDate),
     fetchAlegraCollection<AlegraItem>(config, '/items', {
-      fields: 'averageCost',
+      fields: 'averageCost,itemCategory',
     }),
     fetchAlegraCollection<AlegraBankAccount>(config, '/bank-accounts'),
     fetchMonthlyPayments(config, startDate, endDate),
@@ -944,6 +973,7 @@ export async function getAlegraMetricsSnapshot(
     inventario: {
       value: inventarioValue,
       breakdown: buildInventoryBreakdown(items),
+      categoryBreakdown: buildInventoryByCategory(items),
     },
     margen: {
       value: margenValue,

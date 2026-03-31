@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getYearlyVentasData } from '@/lib/chart-data';
+import { getYearlyVentasData, getInventarioRadarData } from '@/lib/chart-data';
 import VentasChart from './VentasChart';
+import InventarioRadarChart from './InventarioRadarChart';
 import Link from 'next/link';
 
 export default async function VentasPage() {
@@ -14,7 +15,8 @@ export default async function VentasPage() {
     redirect('/login');
   }
 
-  const { companyName, chartData } = await getYearlyVentasData();
+  const [{ companyName, chartData }, { chartData: inventarioData }] =
+    await Promise.all([getYearlyVentasData(), getInventarioRadarData()]);
 
   return (
     <main className="min-h-screen bg-white px-9 py-13 max-w-md mx-auto font-mono">
@@ -35,8 +37,12 @@ export default async function VentasPage() {
         </div>
       </div>
 
-      {/* Chart */}
+      {/* Charts */}
       <VentasChart data={chartData} />
+
+      <div className="mt-12">
+        <InventarioRadarChart data={inventarioData} />
+      </div>
     </main>
   );
 }
