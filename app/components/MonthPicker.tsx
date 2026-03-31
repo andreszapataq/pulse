@@ -142,7 +142,7 @@ export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth 
                 ? { duration: 0.01 }
                 : { type: 'spring', stiffness: 400, damping: 30 }
             }
-            className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-sm z-10 max-h-[300px] overflow-y-auto min-w-[140px]"
+            className="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-xs shadow-sm z-10 max-h-[300px] overflow-y-auto min-w-[140px]"
           >
             {months.map((month) => {
               const isSelected = month.value === currentMonth;
