@@ -2,11 +2,11 @@ import { getMetricsData, formatFileDate } from '@/lib/metrics';
 import { getCurrentMonthStr } from '@/lib/alegra';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import Link from 'next/link';
 import AutoRefresh from './components/AutoRefresh';
 import MetricsDisplay from './components/MetricsDisplay';
 import MonthPicker from './components/MonthPicker';
 import LogoutButton from './components/LogoutButton';
+import ChartsLink from './components/ChartsLink';
 
 interface HomeProps {
   searchParams: Promise<{ month?: string }>;
@@ -87,25 +87,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <div className="mt-22 text-center">
         <div className="mb-3 relative flex items-center justify-center">
           <LogoutButton />
-          <Link
-            href="/charts"
-            className="absolute right-0 text-gray-500"
-            aria-label="Ver gráfico de ventas"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 21h18" />
-              <path d="M7 16l4-8 4 4 5-6" />
-            </svg>
-          </Link>
+          <ChartsLink />
         </div>
         <span className="text-[11px] font-normal text-gray-500">
           Última actualización: {fileModifiedTime}
