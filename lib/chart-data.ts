@@ -1,6 +1,6 @@
 import { createClient } from './supabase/server';
 import { getCurrentMonthStr } from './alegra';
-import { getMetricsData, type MetricsData } from './metrics';
+import type { MetricsData } from './metrics';
 
 export interface InventarioRadarDataPoint {
   category: string;
@@ -8,7 +8,6 @@ export interface InventarioRadarDataPoint {
 }
 
 export interface InventarioRadarChartData {
-  companyName: string;
   chartData: InventarioRadarDataPoint[];
 }
 
@@ -23,65 +22,81 @@ export interface VentasChartData {
   chartData: ChartDataPoint[];
 }
 
-export async function getYearlyVentasData(): Promise<VentasChartData> {
+interface SnapshotRow {
+  month: string;
+  metrics_data: MetricsData['metrics'];
+}
+
+/**
+ * Carga todos los snapshots del año (incluyendo el mes actual) desde Supabase.
+ * El snapshot del mes actual se guarda/actualiza cada vez que el dashboard principal carga.
+ */
+async function getYearlySnapshots(): Promise<SnapshotRow[]> {
   const currentMonth = getCurrentMonthStr();
   const currentYear = currentMonth.split('-')[0];
-  const currentMonthNum = Number(currentMonth.split('-')[1]);
 
-  // Fetch current month live data (also gives us the company name)
-  const liveData = await getMetricsData();
-
-  // Fetch all snapshots for the year
   const supabase = await createClient();
-  const { data: snapshots } = await supabase
+  const { data } = await supabase
     .from('monthly_snapshots')
     .select('month, metrics_data')
     .gte('month', `${currentYear}-01`)
-    .lt('month', currentMonth)
+    .lte('month', currentMonth)
     .order('month', { ascending: true });
 
-  const snapshotMap = new Map<string, number>();
-  if (snapshots) {
-    for (const snapshot of snapshots) {
-      const metricsData = snapshot.metrics_data as MetricsData['metrics'];
-      snapshotMap.set(snapshot.month, metricsData?.ventas?.value ?? 0);
-    }
+  return (data ?? []) as SnapshotRow[];
+}
+
+export async function getChartsData(): Promise<{
+  companyName: string;
+  ventasData: VentasChartData;
+  inventarioData: InventarioRadarChartData;
+}> {
+  const currentMonth = getCurrentMonthStr();
+  const currentMonthNum = Number(currentMonth.split('-')[1]);
+
+  const [snapshots, settingsResult] = await Promise.all([
+    getYearlySnapshots(),
+    createClient().then((sb) =>
+      sb.from('settings').select('value').eq('key', 'company_name').single()
+    ),
+  ]);
+
+  const companyName = settingsResult.data?.value?.trim() || 'BioTissue Colombia';
+
+  const snapshotMap = new Map<string, MetricsData['metrics']>();
+  for (const snapshot of snapshots) {
+    snapshotMap.set(snapshot.month, snapshot.metrics_data);
   }
 
+  // Ventas chart
   const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
                       'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
+  const currentYear = currentMonth.split('-')[0];
   const chartData: ChartDataPoint[] = [];
 
   for (let m = 1; m <= currentMonthNum; m++) {
     const monthStr = `${currentYear}-${String(m).padStart(2, '0')}`;
-    const isCurrentMonth = monthStr === currentMonth;
+    const metrics = snapshotMap.get(monthStr);
 
     chartData.push({
       month: monthStr,
       monthLabel: monthNames[m - 1],
-      ventas: isCurrentMonth
-        ? liveData.metrics.ventas.value
-        : (snapshotMap.get(monthStr) ?? 0),
+      ventas: metrics?.ventas?.value ?? 0,
     });
   }
 
-  return {
-    companyName: liveData.companyName,
-    chartData,
-  };
-}
-
-export async function getInventarioRadarData(): Promise<InventarioRadarChartData> {
-  const liveData = await getMetricsData();
-
-  const categoryBreakdown = liveData.metrics.inventario.categoryBreakdown ?? [];
+  // Inventario radar chart (del snapshot más reciente)
+  const currentSnapshot = snapshotMap.get(currentMonth);
+  const categoryBreakdown = currentSnapshot?.inventario?.categoryBreakdown ?? [];
 
   return {
-    companyName: liveData.companyName,
-    chartData: categoryBreakdown.map((item) => ({
-      category: item.category,
-      value: item.value,
-    })),
+    companyName,
+    ventasData: { companyName, chartData },
+    inventarioData: {
+      chartData: categoryBreakdown.map((item) => ({
+        category: item.category,
+        value: item.value,
+      })),
+    },
   };
 }

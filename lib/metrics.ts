@@ -329,7 +329,10 @@ export async function getMetricsData(month?: string): Promise<MetricsData> {
     }
 
     console.log('✅ Métricas de Alegra sincronizadas');
-    return mergeAlegraMetrics(baseData, alegraData);
+    const mergedData = mergeAlegraMetrics(baseData, alegraData);
+    // Guardar snapshot del mes actual para que /charts cargue instantáneo
+    saveMonthlySnapshot(currentMonth, mergedData.metrics).catch(() => {});
+    return mergedData;
   } catch (error) {
     console.error('⚠️ No fue posible sincronizar Alegra, se usarán datos locales:', error);
     return baseData;
