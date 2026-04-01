@@ -11,7 +11,8 @@ import {
 interface ChartDataPoint {
   month: string;
   monthLabel: string;
-  ventas: number;
+  ventas?: number;
+  ventasCurrent?: number;
 }
 
 function formatCurrency(value: number): string {
@@ -25,6 +26,10 @@ function formatCurrency(value: number): string {
 const chartConfig = {
   ventas: {
     label: 'Ventas',
+    color: '#d4d4d4',
+  },
+  ventasCurrent: {
+    label: 'Ventas (en curso)',
     color: '#d4d4d4',
   },
 } satisfies ChartConfig;
@@ -71,6 +76,10 @@ export default function VentasChart({ data }: VentasChartProps) {
               <stop offset="0%" stopColor="#d4d4d4" stopOpacity={0.5} />
               <stop offset="100%" stopColor="#d4d4d4" stopOpacity={0.05} />
             </linearGradient>
+            <linearGradient id="fillVentasCurrent" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#d4d4d4" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="#d4d4d4" stopOpacity={0.02} />
+            </linearGradient>
           </defs>
           <Area
             dataKey="ventas"
@@ -78,6 +87,16 @@ export default function VentasChart({ data }: VentasChartProps) {
             fill="url(#fillVentas)"
             stroke="#a3a3a3"
             strokeWidth={1.5}
+            connectNulls={false}
+          />
+          <Area
+            dataKey="ventasCurrent"
+            type="monotone"
+            fill="url(#fillVentasCurrent)"
+            stroke="#a3a3a3"
+            strokeWidth={1.5}
+            strokeDasharray="4 4"
+            connectNulls={false}
           />
         </AreaChart>
       </ChartContainer>

@@ -14,7 +14,8 @@ export interface InventarioRadarChartData {
 export interface ChartDataPoint {
   month: string;
   monthLabel: string;
-  ventas: number;
+  ventas?: number;
+  ventasCurrent?: number;
 }
 
 export interface VentasChartData {
@@ -77,11 +78,16 @@ export async function getChartsData(): Promise<{
   for (let m = 1; m <= currentMonthNum; m++) {
     const monthStr = `${currentYear}-${String(m).padStart(2, '0')}`;
     const metrics = snapshotMap.get(monthStr);
+    const value = metrics?.ventas?.value ?? 0;
+    const isCurrentMonth = m === currentMonthNum;
+    const isBridge = m === currentMonthNum - 1;
 
     chartData.push({
       month: monthStr,
       monthLabel: monthNames[m - 1],
-      ventas: metrics?.ventas?.value ?? 0,
+      // Complete months get 'ventas'; bridge month gets both to connect the two areas
+      ventas: isCurrentMonth ? undefined : value,
+      ventasCurrent: isCurrentMonth || isBridge ? value : undefined,
     });
   }
 
