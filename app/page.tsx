@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getMetricsData, formatFileDate } from '@/lib/metrics';
 import { getCurrentMonthStr } from '@/lib/alegra';
 import { redirect } from 'next/navigation';
