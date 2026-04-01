@@ -7,7 +7,6 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 interface MonthPickerProps {
   currentMonth: string;
   displayDate: string;
-  isCurrentMonth: boolean;
 }
 
 function generateMonthOptions(currentMonth: string) {
@@ -29,7 +28,7 @@ function generateMonthOptions(currentMonth: string) {
   return options;
 }
 
-export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth }: MonthPickerProps) {
+export default function MonthPicker({ currentMonth, displayDate }: MonthPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -146,7 +145,6 @@ export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth 
           >
             {months.map((month) => {
               const isSelected = month.value === currentMonth;
-              const isTodayMonth = month.value === todayMonth.current;
               return (
                 <button
                   key={month.value}
@@ -154,7 +152,6 @@ export default function MonthPicker({ currentMonth, displayDate, isCurrentMonth 
                   onClick={() => handleSelect(month.value)}
                   className={`w-full text-left px-4 py-3 text-xs cursor-pointer transition-colors
                     ${isSelected ? 'font-semibold' : 'font-normal'}
-                    ${isTodayMonth && !isSelected ? 'text-gray-500' : ''}
                     hover:bg-gray-50 active:bg-gray-100`}
                 >
                   {month.label}

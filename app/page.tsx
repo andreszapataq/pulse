@@ -77,7 +77,6 @@ export default async function Home({ searchParams }: HomeProps) {
           <MonthPicker
             currentMonth={selectedMonth ?? bogotaMonth}
             displayDate={displayDate}
-            isCurrentMonth={isViewingCurrentMonth}
           />
         </div>
       </div>
