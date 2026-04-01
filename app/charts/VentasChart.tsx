@@ -64,12 +64,28 @@ export default function VentasChart({ data }: VentasChartProps) {
             }}
           />
           <ChartTooltip
-            content={
-              <ChartTooltipContent
-                formatter={(value) => formatCurrency(Number(value))}
-                hideIndicator
-              />
-            }
+            content={(props) => {
+              if (!props.active || !props.payload?.length) return null;
+              const data = props.payload[0].payload as ChartDataPoint;
+              // On bridge month both series have values — show only one
+              const filtered = props.payload.filter(
+                (p) =>
+                  !(
+                    p.dataKey === 'ventasCurrent' &&
+                    data.ventas !== undefined &&
+                    data.ventasCurrent !== undefined
+                  )
+              );
+              const { content: _, ...rest } = props;
+              return (
+                <ChartTooltipContent
+                  {...rest}
+                  payload={filtered}
+                  formatter={(value) => formatCurrency(Number(value))}
+                  hideIndicator
+                />
+              );
+            }}
           />
           <defs>
             <linearGradient id="fillVentas" x1="0" y1="0" x2="0" y2="1">
