@@ -69,7 +69,7 @@ export default function LoginForm({ initialError }: LoginFormProps) {
 
   return (
     <motion.div
-      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 16 }}
+      initial={shouldReduceMotion ? undefined : { opacity: 0, y: 6 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
       transition={cardTransition}
     >
