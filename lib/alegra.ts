@@ -912,7 +912,8 @@ export function hasAlegraCredentials(): boolean {
 
 export async function getAlegraMetricsSnapshot(
   customerDiscountRules: CustomerDiscountRule[] = [],
-  dateRange?: { startDate: string; endDate: string }
+  dateRange?: { startDate: string; endDate: string },
+  excludedInvoiceIds: Set<string> = new Set()
 ): Promise<AlegraMetricsSnapshot | null> {
   const config = getAlegraConfig();
 
@@ -939,7 +940,13 @@ export async function getAlegraMetricsSnapshot(
 
   const detailedInvoices = await hydrateInvoicesWithDetails(config, invoices);
 
-  const ventasValue = detailedInvoices.reduce(
+  const salesInvoices = excludedInvoiceIds.size > 0
+    ? detailedInvoices.filter(
+        (invoice) => !excludedInvoiceIds.has(invoice.id?.toString() ?? '')
+      )
+    : detailedInvoices;
+
+  const ventasValue = salesInvoices.reduce(
     (sum, invoice) => sum + getAdjustedInvoiceNetSalesAmount(invoice, discountLookup),
     0
   );
@@ -955,7 +962,7 @@ export async function getAlegraMetricsSnapshot(
   }, 0);
 
   const costByItemId = buildItemCostLookup(items);
-  const costoVentasValue = calculateCostOfGoodsSold(detailedInvoices, costByItemId);
+  const costoVentasValue = calculateCostOfGoodsSold(salesInvoices, costByItemId);
   const utilidadBrutaValue = ventasValue - costoVentasValue;
   const margenValue =
     ventasValue > 0 ? roundPercentage((utilidadBrutaValue / ventasValue) * 100) : 0;
@@ -964,7 +971,7 @@ export async function getAlegraMetricsSnapshot(
     lastUpdated: new Date().toISOString(),
     ventas: {
       value: ventasValue,
-      breakdown: buildSalesBreakdown(detailedInvoices, discountLookup),
+      breakdown: buildSalesBreakdown(salesInvoices, discountLookup),
     },
     recaudo: {
       value: recaudoValue,

@@ -1,5 +1,6 @@
 import { getAlegraMetricsSnapshot, hasAlegraCredentials, getCurrentMonthStr, getFullMonthRange } from './alegra';
 import { getCustomerDiscountRules } from './customer-discounts';
+import { getExcludedInvoiceIds } from './excluded-invoices';
 import { createClient } from './supabase/server';
 
 /**
@@ -301,9 +302,16 @@ export async function getMetricsData(month?: string): Promise<MetricsData> {
 
     // No hay snapshot — consultar Alegra para el mes completo
     try {
-      const customerDiscountRules = await getCustomerDiscountRules();
+      const [customerDiscountRules, excludedInvoiceIds] = await Promise.all([
+        getCustomerDiscountRules(),
+        getExcludedInvoiceIds(),
+      ]);
       const dateRange = getFullMonthRange(month);
-      const alegraData = await getAlegraMetricsSnapshot(customerDiscountRules, dateRange);
+      const alegraData = await getAlegraMetricsSnapshot(
+        customerDiscountRules,
+        dateRange,
+        excludedInvoiceIds
+      );
 
       if (!alegraData) {
         return baseData;
@@ -321,8 +329,15 @@ export async function getMetricsData(month?: string): Promise<MetricsData> {
 
   // Mes actual: comportamiento existente (month-to-date)
   try {
-    const customerDiscountRules = await getCustomerDiscountRules();
-    const alegraData = await getAlegraMetricsSnapshot(customerDiscountRules);
+    const [customerDiscountRules, excludedInvoiceIds] = await Promise.all([
+      getCustomerDiscountRules(),
+      getExcludedInvoiceIds(),
+    ]);
+    const alegraData = await getAlegraMetricsSnapshot(
+      customerDiscountRules,
+      undefined,
+      excludedInvoiceIds
+    );
 
     if (!alegraData) {
       return baseData;
